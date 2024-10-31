@@ -431,6 +431,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                         for (const locData of dataArray['assigned-locations'] || []) {
                             // Handle temperature, depth, and DO time series
                             const stageTimeSeries = locData['tsid-stage']?.['assigned-time-series'] || [];
+                            const twTimeSeries = locData['tsid-tw']?.['assigned-time-series'] || [];
 
                             // Function to create fetch promises for time series data
                             const timeSeriesDataFetchPromises = (timeSeries, type) => {
@@ -463,96 +464,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                                             const incValue = getIncValue(data, tsid);
                                             const hourlyValue = getHourlyDataOnTopOfHour(data, tsid);
 
-                                            let apiDataKey;
-                                            if (type === 'stage') {
-                                                apiDataKey = 'stage-api-data';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
-                                            if (!locData[apiDataKey]) {
-                                                locData[apiDataKey] = [];
-                                            }
-                                            locData[apiDataKey].push(data);
-
-
-                                            let lastValueKey;
-                                            if (type === 'stage') {
-                                                lastValueKey = 'stage-last-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
-                                            if (!locData[lastValueKey]) {
-                                                locData[lastValueKey] = [];
-                                            }
-                                            locData[lastValueKey].push(lastValue);
-                                            
-
-
-                                            let maxValueKey;
-                                            if (type === 'stage') {
-                                                maxValueKey = 'stage-max-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
-                                            if (!locData[maxValueKey]) {
-                                                locData[maxValueKey] = [];
-                                            }
-                                            locData[maxValueKey].push(maxValue);
-
-
-                                            let minValueKey;
-                                            if (type === 'stage') {
-                                                minValueKey = 'stage-min-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
-                                            if (!locData[minValueKey]) {
-                                                locData[minValueKey] = [];
-                                            }
-                                            locData[minValueKey].push(minValue);
-
-
-                                            let cumValueKey;
-                                            if (type === 'stage') {
-                                                cumValueKey = 'stage-cum-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
-                                            if (!locData[cumValueKey]) {
-                                                locData[cumValueKey] = [];
-                                            }
-                                            locData[cumValueKey].push(cumValue);
-
-
-                                            let incValueKey;
-                                            if (type === 'stage') {
-                                                incValueKey = 'stage-inc-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
-                                            if (!locData[incValueKey]) {
-                                                locData[incValueKey] = [];
-                                            }
-                                            locData[incValueKey].push(incValue);
-
-
-                                            let hourlyValueKey;
-                                            if (type === 'stage') {
-                                                hourlyValueKey = 'stage-hourly-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
-                                            if (!locData[hourlyValueKey]) {
-                                                locData[hourlyValueKey] = [];
-                                            }
-                                            locData[hourlyValueKey].push(hourlyValue); 
+                                            updateLocData(locData, type, data, lastValue, maxValue, minValue, cumValue, incValue, hourlyValue);
                                         })
 
                                         .catch(error => {
@@ -563,6 +475,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                             // Create promises for temperature, depth, and DO time series
                             const stagePromises = timeSeriesDataFetchPromises(stageTimeSeries, 'stage');
+                            const twPromises = timeSeriesDataFetchPromises(twTimeSeries, 'tw');
 
                             // Additional API call for extents data
                             const timeSeriesDataExtentsApiCall = async (type) => {
@@ -582,7 +495,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                                     // Collect TSIDs from temp, depth, and DO time series
                                     const stageTids = stageTimeSeries.map(series => series['timeseries-id']);
-                                    const allTids = [...stageTids]; // Combine both arrays
+                                    const twTids = twTimeSeries.map(series => series['timeseries-id']);
+                                    const allTids = [...stageTids, ...twTids]; // Combine both arrays
 
                                     allTids.forEach((tsid, index) => {
                                         const matchingEntry = data.entries.find(entry => entry['name'] === tsid);
@@ -649,7 +563,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                             };
 
                             // Combine all promises for this location
-                            timeSeriesDataPromises.push(Promise.all([...stagePromises, timeSeriesDataExtentsApiCall()]));
+                            timeSeriesDataPromises.push(Promise.all([...stagePromises, ...twPromises, timeSeriesDataExtentsApiCall()]));
                         }
                     }
 
@@ -1496,4 +1410,48 @@ function createTablePrecip(combinedData, type, reportNumber) {
     });
 
     return table;
+}
+
+function updateLocData(locData, type, data, lastValue, maxValue, minValue, cumValue, incValue, hourlyValue) {
+    const keys = {
+        apiDataKey: `${type}-api-data`,
+        lastValueKey: `${type}-last-value`,
+        maxValueKey: `${type}-max-value`,
+        minValueKey: `${type}-min-value`,
+        cumValueKey: `${type}-cum-value`,
+        incValueKey: `${type}-inc-value`,
+        hourlyValueKey: `${type}-hourly-value`
+    };
+
+    for (let [key, value] of Object.entries(keys)) {
+        if (!locData[value]) {
+            locData[value] = [];
+        }
+
+        switch (key) {
+            case 'apiDataKey':
+                locData[value].push(data);
+                break;
+            case 'lastValueKey':
+                locData[value].push(lastValue);
+                break;
+            case 'maxValueKey':
+                locData[value].push(maxValue);
+                break;
+            case 'minValueKey':
+                locData[value].push(minValue);
+                break;
+            case 'cumValueKey':
+                locData[value].push(cumValue);
+                break;
+            case 'incValueKey':
+                locData[value].push(incValue);
+                break;
+            case 'hourlyValueKey':
+                locData[value].push(hourlyValue);
+                break;
+            default:
+                console.error('Unknown key:', key);
+        }
+    }
 }
