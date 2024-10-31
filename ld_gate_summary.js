@@ -145,131 +145,131 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                                     // Fetch river-mile
                                     (() => {
-                                        riverMilePromises.push(
-                                            fetch('json/gage_control_official.json')
-                                                .then(response => {
-                                                    if (!response.ok) {
-                                                        throw new Error(`Network response was not ok: ${response.statusText}`);
-                                                    }
-                                                    return response.json();
-                                                })
-                                                .then(riverMilesJson => {
-                                                    // Loop through each basin in the JSON
-                                                    for (const basin in riverMilesJson) {
-                                                        const locations = riverMilesJson[basin];
+                                        // riverMilePromises.push(
+                                        //     fetch('json/gage_control_official.json')
+                                        //         .then(response => {
+                                        //             if (!response.ok) {
+                                        //                 throw new Error(`Network response was not ok: ${response.statusText}`);
+                                        //             }
+                                        //             return response.json();
+                                        //         })
+                                        //         .then(riverMilesJson => {
+                                        //             // Loop through each basin in the JSON
+                                        //             for (const basin in riverMilesJson) {
+                                        //                 const locations = riverMilesJson[basin];
 
-                                                        for (const loc in locations) {
-                                                            const ownerData = locations[loc];
-                                                            // console.log("ownerData: ", ownerData);
+                                        //                 for (const loc in locations) {
+                                        //                     const ownerData = locations[loc];
+                                        //                     // console.log("ownerData: ", ownerData);
 
-                                                            // Retrieve river mile and other data
-                                                            const riverMile = ownerData.river_mile_hard_coded;
+                                        //                     // Retrieve river mile and other data
+                                        //                     const riverMile = ownerData.river_mile_hard_coded;
 
-                                                            // Create an output object using the location name as ID
-                                                            const outputData = {
-                                                                locationId: loc, // Using location name as ID
-                                                                basin: basin,
-                                                                riverMile: riverMile
-                                                            };
+                                        //                     // Create an output object using the location name as ID
+                                        //                     const outputData = {
+                                        //                         locationId: loc, // Using location name as ID
+                                        //                         basin: basin,
+                                        //                         riverMile: riverMile
+                                        //                     };
 
-                                                            // console.log("Output Data:", outputData);
-                                                            riverMileMap.set(loc, ownerData); // Store the data in the map
-                                                        }
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error('Problem with the fetch operation:', error);
-                                                })
-                                        )
+                                        //                     // console.log("Output Data:", outputData);
+                                        //                     riverMileMap.set(loc, ownerData); // Store the data in the map
+                                        //                 }
+                                        //             }
+                                        //         })
+                                        //         .catch(error => {
+                                        //             console.error('Problem with the fetch operation:', error);
+                                        //         })
+                                        // )
                                     })();
 
                                     // Fetch metadata
                                     (() => {
-                                        const locApiUrl = setBaseUrl + `locations/${loc['location-id']}?office=${office}`;
-                                        // console.log("locApiUrl: ", locApiUrl);
-                                        metadataPromises.push(
-                                            fetch(locApiUrl)
-                                                .then(response => {
-                                                    if (response.status === 404) {
-                                                        console.warn(`Location metadata not found for location: ${loc['location-id']}`);
-                                                        return null; // Skip if not found
-                                                    }
-                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                                                    return response.json();
-                                                })
-                                                .then(locData => {
-                                                    if (locData) {
-                                                        metadataMap.set(loc['location-id'], locData);
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
-                                                })
-                                        );
+                                        // const locApiUrl = setBaseUrl + `locations/${loc['location-id']}?office=${office}`;
+                                        // // console.log("locApiUrl: ", locApiUrl);
+                                        // metadataPromises.push(
+                                        //     fetch(locApiUrl)
+                                        //         .then(response => {
+                                        //             if (response.status === 404) {
+                                        //                 console.warn(`Location metadata not found for location: ${loc['location-id']}`);
+                                        //                 return null; // Skip if not found
+                                        //             }
+                                        //             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                        //             return response.json();
+                                        //         })
+                                        //         .then(locData => {
+                                        //             if (locData) {
+                                        //                 metadataMap.set(loc['location-id'], locData);
+                                        //             }
+                                        //         })
+                                        //         .catch(error => {
+                                        //             console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
+                                        //         })
+                                        // );
                                     })();
 
                                     // Fetch flood
                                     (() => {
-                                        // Fetch flood location level for each location
-                                        const levelIdFlood = loc['location-id'] + ".Stage.Inst.0.Flood";
-                                        // console.log("levelIdFlood: ", levelIdFlood);
+                                        // // Fetch flood location level for each location
+                                        // const levelIdFlood = loc['location-id'] + ".Stage.Inst.0.Flood";
+                                        // // console.log("levelIdFlood: ", levelIdFlood);
 
-                                        const levelIdEffectiveDate = "2024-01-01T08:00:00";
-                                        // console.log("levelIdEffectiveDate: ", levelIdEffectiveDate);
+                                        // const levelIdEffectiveDate = "2024-01-01T08:00:00";
+                                        // // console.log("levelIdEffectiveDate: ", levelIdEffectiveDate);
 
-                                        const floodApiUrl = setBaseUrl + `levels/${levelIdFlood}?office=${office}&effective-date=${levelIdEffectiveDate}&unit=ft`;
-                                        // console.log("floodApiUrl: ", floodApiUrl);
-                                        floodPromises.push(
-                                            fetch(floodApiUrl)
-                                                .then(response => {
-                                                    if (response.status === 404) {
-                                                        console.warn(`Location metadata not found for location: ${loc['location-id']}`);
-                                                        return null; // Skip if not found
-                                                    }
-                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                                                    return response.json();
-                                                })
-                                                .then(floodData => {
-                                                    if (floodData) {
-                                                        floodMap.set(loc['location-id'], floodData);
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
-                                                })
-                                        );
+                                        // const floodApiUrl = setBaseUrl + `levels/${levelIdFlood}?office=${office}&effective-date=${levelIdEffectiveDate}&unit=ft`;
+                                        // // console.log("floodApiUrl: ", floodApiUrl);
+                                        // floodPromises.push(
+                                        //     fetch(floodApiUrl)
+                                        //         .then(response => {
+                                        //             if (response.status === 404) {
+                                        //                 console.warn(`Location metadata not found for location: ${loc['location-id']}`);
+                                        //                 return null; // Skip if not found
+                                        //             }
+                                        //             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                        //             return response.json();
+                                        //         })
+                                        //         .then(floodData => {
+                                        //             if (floodData) {
+                                        //                 floodMap.set(loc['location-id'], floodData);
+                                        //             }
+                                        //         })
+                                        //         .catch(error => {
+                                        //             console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
+                                        //         })
+                                        // );
                                     })();
 
                                     // Fetch lwrp
                                     (() => {
-                                        // Fetch lwrp location level for each location
-                                        const levelIdLwrp = loc['location-id'] + ".Stage.Inst.0.LWRP";
-                                        // console.log("levelIdFlood: ", levelIdFlood);
+                                        // // Fetch lwrp location level for each location
+                                        // const levelIdLwrp = loc['location-id'] + ".Stage.Inst.0.LWRP";
+                                        // // console.log("levelIdFlood: ", levelIdFlood);
 
-                                        const levelIdEffectiveDate = "2024-01-01T08:00:00";
-                                        // console.log("levelIdEffectiveDate: ", levelIdEffectiveDate);
+                                        // const levelIdEffectiveDate = "2024-01-01T08:00:00";
+                                        // // console.log("levelIdEffectiveDate: ", levelIdEffectiveDate);
 
-                                        const lwrpApiUrl = setBaseUrl + `levels/${levelIdLwrp}?office=${office}&effective-date=${levelIdEffectiveDate}&unit=ft`;
-                                        // console.log("lwrpApiUrl: ", lwrpApiUrl);
-                                        lwrpPromises.push(
-                                            fetch(lwrpApiUrl)
-                                                .then(response => {
-                                                    if (response.status === 404) {
-                                                        console.warn(`Location metadata not found for location: ${loc['location-id']}`);
-                                                        return null; // Skip if not found
-                                                    }
-                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                                                    return response.json();
-                                                })
-                                                .then(lwrpData => {
-                                                    if (lwrpData) {
-                                                        lwrpMap.set(loc['location-id'], lwrpData);
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
-                                                })
-                                        );
+                                        // const lwrpApiUrl = setBaseUrl + `levels/${levelIdLwrp}?office=${office}&effective-date=${levelIdEffectiveDate}&unit=ft`;
+                                        // // console.log("lwrpApiUrl: ", lwrpApiUrl);
+                                        // lwrpPromises.push(
+                                        //     fetch(lwrpApiUrl)
+                                        //         .then(response => {
+                                        //             if (response.status === 404) {
+                                        //                 console.warn(`Location metadata not found for location: ${loc['location-id']}`);
+                                        //                 return null; // Skip if not found
+                                        //             }
+                                        //             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                        //             return response.json();
+                                        //         })
+                                        //         .then(lwrpData => {
+                                        //             if (lwrpData) {
+                                        //                 lwrpMap.set(loc['location-id'], lwrpData);
+                                        //             }
+                                        //         })
+                                        //         .catch(error => {
+                                        //             console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
+                                        //         })
+                                        // );
                                     })();
 
                                     // Fetch owner
@@ -444,26 +444,26 @@ document.addEventListener('DOMContentLoaded', async function () {
                         if (basinData['assigned-locations']) {
                             basinData['assigned-locations'].forEach(loc => {
 
-                                // Append metadata
-                                const metadataMapData = metadataMap.get(loc['location-id']);
-                                if (metadataMapData) {
-                                    loc['metadata'] = metadataMapData;
-                                }
+                                // // Append metadata
+                                // const metadataMapData = metadataMap.get(loc['location-id']);
+                                // if (metadataMapData) {
+                                //     loc['metadata'] = metadataMapData;
+                                // }
 
-                                // Append flood
-                                const floodMapData = floodMap.get(loc['location-id']);
-                                loc['flood'] = floodMapData !== undefined ? floodMapData : null;
+                                // // Append flood
+                                // const floodMapData = floodMap.get(loc['location-id']);
+                                // loc['flood'] = floodMapData !== undefined ? floodMapData : null;
 
 
-                                // Append lwrp
-                                const lwrpMapData = lwrpMap.get(loc['location-id']);
-                                loc['lwrp'] = lwrpMapData !== undefined ? lwrpMapData : null;
+                                // // Append lwrp
+                                // const lwrpMapData = lwrpMap.get(loc['location-id']);
+                                // loc['lwrp'] = lwrpMapData !== undefined ? lwrpMapData : null;
 
-                                // Append river-mile
-                                const riverMileMapData = riverMileMap.get(loc['location-id']);
-                                if (riverMileMapData) {
-                                    loc['river-mile'] = riverMileMapData;
-                                }
+                                // // Append river-mile
+                                // const riverMileMapData = riverMileMap.get(loc['location-id']);
+                                // if (riverMileMapData) {
+                                //     loc['river-mile'] = riverMileMapData;
+                                // }
 
                                 // Append owner
                                 const ownerMapData = ownerMap.get(loc['location-id']);
@@ -561,6 +561,83 @@ document.addEventListener('DOMContentLoaded', async function () {
                     });
 
                     console.log('combinedData:', combinedData);
+
+                    // ***************************************************************************************************
+                    // ********************************** FILTER DATA ****************************************************
+                    // ***************************************************************************************************
+
+                    // Step 1: Filter out locations where 'attribute' ends with '.1'
+                    combinedData.forEach((dataObj, index) => {
+                        // console.log(`Processing dataObj at index ${index}:`, dataObj['assigned-locations']);
+
+                        // Filter out locations with 'attribute' ending in '.1'
+                        dataObj['assigned-locations'] = dataObj['assigned-locations'].filter(location => {
+                            const attribute = location['attribute'].toString();
+                            if (attribute.endsWith('.1')) {
+                                // Log the location being removed
+                                console.log(`Removing location with attribute '${attribute}' and id '${location['location-id']}' at index ${index}`);
+                                return false; // Filter out this location
+                            }
+                            return true; // Keep the location
+                        });
+
+                        // console.log(`Updated assigned-locations for index ${index}:`, dataObj['assigned-locations']);
+                    });
+
+                    console.log('Filtered all locations ending with .1 successfully:', combinedData);
+
+                    // Step 2: Filter out locations where 'location-id' doesn't match owner's 'assigned-locations'
+                    combinedData.forEach(dataGroup => {
+                        // Iterate over each assigned-location in the dataGroup
+                        let locations = dataGroup['assigned-locations'];
+
+                        // Loop through the locations array in reverse to safely remove items
+                        for (let i = locations.length - 1; i >= 0; i--) {
+                            let location = locations[i];
+
+                            // Find if the current location-id exists in owner's assigned-locations
+                            let matchingOwnerLocation = location['owner']['assigned-locations'].some(ownerLoc => {
+                                return ownerLoc['location-id'] === location['location-id'];
+                            });
+
+                            // If no match, remove the location
+                            if (!matchingOwnerLocation) {
+                                console.log(`Removing location with id ${location['location-id']} as it does not match owner`);
+                                locations.splice(i, 1);
+                            }
+                        }
+                    });
+
+                    console.log('Filtered all locations by matching location-id with owner successfully:', combinedData);
+
+                    // Step 3: Filter out locations where 'tsid-stage' is null
+                    combinedData.forEach(dataGroup => {
+                        // Iterate over each assigned-location in the dataGroup
+                        let locations = dataGroup['assigned-locations'];
+
+                        // Loop through the locations array in reverse to safely remove items
+                        for (let i = locations.length - 1; i >= 0; i--) {
+                            let location = locations[i];
+
+                            // console.log("tsid-stage: ", location[`tsid-stage`]);
+
+                            // Check if 'tsid-stage' is null or undefined
+                            let isLocationNull = location[`tsid-stage`] == null;
+
+                            // If tsid-stage is null, remove the location
+                            if (isLocationNull) {
+                                console.log(`Removing location with id ${location['location-id']}`);
+                                locations.splice(i, 1); // Remove the location from the array
+                            }
+                        }
+                    });
+
+                    console.log('Filtered all locations where tsid is null successfully:', combinedData);
+
+                    // Step 4: Filter out basin where there are no gages
+                    combinedData = combinedData.filter(item => item['assigned-locations'] && item['assigned-locations'].length > 0);
+
+                    console.log('Filtered all basin where assigned-locations is null successfully:', combinedData);
 
                     const timeSeriesDataPromises = [];
 
@@ -722,82 +799,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                     console.log('All combinedData data fetched successfully:', combinedData);
 
-                    // ***************************************************************************************************
-                    // ********************************** FILTER DATA ****************************************************
-                    // ***************************************************************************************************
-
-                    // Step 1: Filter out locations where 'attribute' ends with '.1'
-                    combinedData.forEach((dataObj, index) => {
-                        // console.log(`Processing dataObj at index ${index}:`, dataObj['assigned-locations']);
-
-                        // Filter out locations with 'attribute' ending in '.1'
-                        dataObj['assigned-locations'] = dataObj['assigned-locations'].filter(location => {
-                            const attribute = location['attribute'].toString();
-                            if (attribute.endsWith('.1')) {
-                                // Log the location being removed
-                                console.log(`Removing location with attribute '${attribute}' and id '${location['location-id']}' at index ${index}`);
-                                return false; // Filter out this location
-                            }
-                            return true; // Keep the location
-                        });
-
-                        // console.log(`Updated assigned-locations for index ${index}:`, dataObj['assigned-locations']);
-                    });
-
-                    console.log('Filtered all locations ending with .1 successfully:', combinedData);
-
-                    // Step 2: Filter out locations where 'location-id' doesn't match owner's 'assigned-locations'
-                    combinedData.forEach(dataGroup => {
-                        // Iterate over each assigned-location in the dataGroup
-                        let locations = dataGroup['assigned-locations'];
-
-                        // Loop through the locations array in reverse to safely remove items
-                        for (let i = locations.length - 1; i >= 0; i--) {
-                            let location = locations[i];
-
-                            // Find if the current location-id exists in owner's assigned-locations
-                            let matchingOwnerLocation = location['owner']['assigned-locations'].some(ownerLoc => {
-                                return ownerLoc['location-id'] === location['location-id'];
-                            });
-
-                            // If no match, remove the location
-                            if (!matchingOwnerLocation) {
-                                console.log(`Removing location with id ${location['location-id']} as it does not match owner`);
-                                locations.splice(i, 1);
-                            }
-                        }
-                    });
-
-                    console.log('Filtered all locations by matching location-id with owner successfully:', combinedData);
-
-                    // Step 3: Filter out locations where 'tsid-stage' is null
-                    combinedData.forEach(dataGroup => {
-                        // Iterate over each assigned-location in the dataGroup
-                        let locations = dataGroup['assigned-locations'];
-
-                        // Loop through the locations array in reverse to safely remove items
-                        for (let i = locations.length - 1; i >= 0; i--) {
-                            let location = locations[i];
-
-                            // console.log("tsid-stage: ", location[`tsid-stage`]);
-
-                            // Check if 'tsid-stage' is null or undefined
-                            let isLocationNull = location[`tsid-stage`] == null;
-
-                            // If tsid-stage is null, remove the location
-                            if (isLocationNull) {
-                                console.log(`Removing location with id ${location['location-id']}`);
-                                locations.splice(i, 1); // Remove the location from the array
-                            }
-                        }
-                    });
-
-                    console.log('Filtered all locations where tsid is null successfully:', combinedData);
-
-                    // Step 4: Filter out basin where there are no gages
-                    combinedData = combinedData.filter(item => item['assigned-locations'] && item['assigned-locations'].length > 0);
-
-                    console.log('Filtered all basin where assigned-locations is null successfully:', combinedData);
+                    
 
                     // ***************************************************************************************************
                     // ********************************** CREATE TABLE ***************************************************
@@ -1562,11 +1564,11 @@ function createTablePrecip(combinedData, type, reportNumber) {
 function updateLocData(locData, type, data, lastValue, maxValue, minValue, cumValue, incValue, hourlyValue) {
     const keys = {
         apiDataKey: `${type}-api-data`,
-        lastValueKey: `${type}-last-value`,
-        maxValueKey: `${type}-max-value`,
-        minValueKey: `${type}-min-value`,
-        cumValueKey: `${type}-cum-value`,
-        incValueKey: `${type}-inc-value`,
+        // lastValueKey: `${type}-last-value`,
+        // maxValueKey: `${type}-max-value`,
+        // minValueKey: `${type}-min-value`,
+        // cumValueKey: `${type}-cum-value`,
+        // incValueKey: `${type}-inc-value`,
         hourlyValueKey: `${type}-hourly-value`
     };
 
