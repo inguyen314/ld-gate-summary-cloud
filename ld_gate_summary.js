@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     let setLocationGroupOwner = null;
     let setTimeseriesGroup1 = null;
     let setTimeseriesGroup2 = null;
+    let setTimeseriesGroup3 = null;
+    let setTimeseriesGroup4 = null;
+    let setTimeseriesGroup5 = null;
     let setLookBackHours = null;
     let reportDiv = null;
 
@@ -21,6 +24,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         setLocationGroupOwner = "Ld-Gate-Summary";
         setTimeseriesGroup1 = "Stage";
         setTimeseriesGroup2 = "Stage-TW";
+        setTimeseriesGroup3 = "Hinge-Point";
+        setTimeseriesGroup4 = "Tainter";
+        setTimeseriesGroup5 = "Roller";
         setLookBackHours = subtractDaysFromDate(new Date(), 2);
     }
 
@@ -32,6 +38,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     console.log("setLocationGroupOwner: ", setLocationGroupOwner);
     console.log("setTimeseriesGroup1: ", setTimeseriesGroup1);
     console.log("setTimeseriesGroup2: ", setTimeseriesGroup2);
+    console.log("setTimeseriesGroup3: ", setTimeseriesGroup3);
+    console.log("setTimeseriesGroup4: ", setTimeseriesGroup4);
+    console.log("setTimeseriesGroup5: ", setTimeseriesGroup5);
     console.log("setLookBackHours: ", setLookBackHours);
 
     let setBaseUrl = null;
@@ -55,6 +64,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     const tsidStageMap = new Map();
     const riverMileMap = new Map();
     const tsidTwMap = new Map();
+    const tsidHingePointMap = new Map();
+    const tsidTainterMap = new Map();
+    const tsidRollerMap = new Map();
 
     // Initialize arrays for storing promises
     const metadataPromises = [];
@@ -64,6 +76,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     const stageTsidPromises = [];
     const riverMilePromises = [];
     const twTsidPromises = [];
+    const hingePointTsidPromises = [];
+    const tainterTsidPromises = [];
+    const rollerTsidPromises = [];
 
     // Fetch location group data from the API
     fetch(categoryApiUrl)
@@ -334,6 +349,75 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                 })
                                         );
                                     })();
+
+                                    // Fetch tsid 3
+                                    (() => {
+                                        const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup3}?office=${office}&category-id=${loc['location-id']}`;
+                                        // console.log('tsidApiUrl:', tsidApiUrl);
+                                        hingePointTsidPromises.push(
+                                            fetch(tsidApiUrl)
+                                                .then(response => {
+                                                    if (response.status === 404) return null; // Skip if not found
+                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                                    return response.json();
+                                                })
+                                                .then(data => {
+                                                    // // console.log('data:', data);
+                                                    if (data) {
+                                                        tsidHingePointMap.set(loc['location-id'], data);
+                                                    }
+                                                })
+                                                .catch(error => {
+                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                })
+                                        );
+                                    })();
+
+                                    // Fetch tsid 4
+                                    (() => {
+                                        const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup4}?office=${office}&category-id=${loc['location-id']}`;
+                                        // console.log('tsidApiUrl:', tsidApiUrl);
+                                        tainterTsidPromises.push(
+                                            fetch(tsidApiUrl)
+                                                .then(response => {
+                                                    if (response.status === 404) return null; // Skip if not found
+                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                                    return response.json();
+                                                })
+                                                .then(data => {
+                                                    // // console.log('data:', data);
+                                                    if (data) {
+                                                        tsidTainterMap.set(loc['location-id'], data);
+                                                    }
+                                                })
+                                                .catch(error => {
+                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                })
+                                        );
+                                    })();
+
+                                    // Fetch tsid 5
+                                    (() => {
+                                        const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup5}?office=${office}&category-id=${loc['location-id']}`;
+                                        // console.log('tsidApiUrl:', tsidApiUrl);
+                                        rollerTsidPromises.push(
+                                            fetch(tsidApiUrl)
+                                                .then(response => {
+                                                    if (response.status === 404) return null; // Skip if not found
+                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                                    return response.json();
+                                                })
+                                                .then(data => {
+                                                    // // console.log('data:', data);
+                                                    if (data) {
+                                                        tsidRollerMap.set(loc['location-id'], data);
+                                                    }
+                                                })
+                                                .catch(error => {
+                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                })
+                                        );
+                                    })();
                                 });
                             }
                         })
@@ -352,6 +436,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                 .then(() => Promise.all(stageTsidPromises))
                 .then(() => Promise.all(riverMilePromises))
                 .then(() => Promise.all(twTsidPromises))
+                .then(() => Promise.all(hingePointTsidPromises))
+                .then(() => Promise.all(tainterTsidPromises))
+                .then(() => Promise.all(rollerTsidPromises))
                 .then(() => {
                     combinedData.forEach(basinData => {
                         if (basinData['assigned-locations']) {
@@ -402,6 +489,33 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     loc['tsid-tw'] = null;
                                 }
 
+                                // Append tsid 3
+                                const tsidHingePointMapData = tsidHingePointMap.get(loc['location-id']);
+                                if (tsidHingePointMapData) {
+                                    reorderByAttribute(tsidHingePointMapData);
+                                    loc['tsid-hinge-point'] = tsidHingePointMapData;
+                                } else {
+                                    loc['tsid-hinge-point'] = null;
+                                }
+
+                                // Append tsid 4
+                                const tsidTainterMapData = tsidTainterMap.get(loc['location-id']);
+                                if (tsidTainterMapData) {
+                                    reorderByAttribute(tsidTainterMapData);
+                                    loc['tsid-tainter'] = tsidTainterMapData;
+                                } else {
+                                    loc['tsid-tainter'] = null;
+                                }
+
+                                // Append tsid 5
+                                const tsidRollerMapData = tsidRollerMap.get(loc['location-id']);
+                                if (tsidRollerMapData) {
+                                    reorderByAttribute(tsidRollerMapData);
+                                    loc['tsid-roller'] = tsidRollerMapData;
+                                } else {
+                                    loc['tsid-roller'] = null;
+                                }
+
                                 // Initialize empty arrays to hold API and last-value data for various parameters
                                 loc['stage-api-data'] = [];
                                 loc['stage-cum-value'] = [];
@@ -418,6 +532,30 @@ document.addEventListener('DOMContentLoaded', async function () {
                                 loc['tw-last-value'] = [];
                                 loc['tw-max-value'] = [];
                                 loc['tw-min-value'] = [];
+
+                                loc['hinge-point-api-data'] = [];
+                                loc['hinge-point-cum-value'] = [];
+                                loc['hinge-point-hourly-value'] = [];
+                                loc['hinge-point-inc-value'] = [];
+                                loc['hinge-point-last-value'] = [];
+                                loc['hinge-point-max-value'] = [];
+                                loc['hinge-point-min-value'] = [];
+
+                                loc['tainter-api-data'] = [];
+                                loc['tainter-cum-value'] = [];
+                                loc['tainter-hourly-value'] = [];
+                                loc['tainter-inc-value'] = [];
+                                loc['tainter-last-value'] = [];
+                                loc['tainter-max-value'] = [];
+                                loc['tainter-min-value'] = [];
+
+                                loc['roller-api-data'] = [];
+                                loc['roller-cum-value'] = [];
+                                loc['roller-hourly-value'] = [];
+                                loc['roller-inc-value'] = [];
+                                loc['roller-last-value'] = [];
+                                loc['roller-max-value'] = [];
+                                loc['roller-min-value'] = [];
                             });
                         }
                     });
@@ -432,6 +570,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                             // Handle temperature, depth, and DO time series
                             const stageTimeSeries = locData['tsid-stage']?.['assigned-time-series'] || [];
                             const twTimeSeries = locData['tsid-tw']?.['assigned-time-series'] || [];
+                            const hingePointTimeSeries = locData['tsid-tw']?.['assigned-time-series'] || [];
+                            const tainterTimeSeries = locData['tsid-tainter']?.['assigned-time-series'] || [];
+                            const rollerTimeSeries = locData['tsid-roller']?.['assigned-time-series'] || [];
 
                             // Function to create fetch promises for time series data
                             const timeSeriesDataFetchPromises = (timeSeries, type) => {
@@ -476,6 +617,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                             // Create promises for temperature, depth, and DO time series
                             const stagePromises = timeSeriesDataFetchPromises(stageTimeSeries, 'stage');
                             const twPromises = timeSeriesDataFetchPromises(twTimeSeries, 'tw');
+                            const hingePointPromises = timeSeriesDataFetchPromises(hingePointTimeSeries, 'hinge-point');
+                            const tainterPromises = timeSeriesDataFetchPromises(tainterTimeSeries, 'tainter');
+                            const rollerPromises = timeSeriesDataFetchPromises(rollerTimeSeries, 'roller');
 
                             // Additional API call for extents data
                             const timeSeriesDataExtentsApiCall = async (type) => {
@@ -496,7 +640,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     // Collect TSIDs from temp, depth, and DO time series
                                     const stageTids = stageTimeSeries.map(series => series['timeseries-id']);
                                     const twTids = twTimeSeries.map(series => series['timeseries-id']);
-                                    const allTids = [...stageTids, ...twTids]; // Combine both arrays
+                                    const hingePointTids = twTimeSeries.map(series => series['timeseries-id']);
+                                    const tainterTids = tainterTimeSeries.map(series => series['timeseries-id']);
+                                    const rollerTids = rollerTimeSeries.map(series => series['timeseries-id']);
+                                    const allTids = [...stageTids, ...twTids, ...hingePointTids, ...tainterTids, ...rollerTids]; // Combine both arrays
 
                                     allTids.forEach((tsid, index) => {
                                         const matchingEntry = data.entries.find(entry => entry['name'] === tsid);
@@ -563,7 +710,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                             };
 
                             // Combine all promises for this location
-                            timeSeriesDataPromises.push(Promise.all([...stagePromises, ...twPromises, timeSeriesDataExtentsApiCall()]));
+                            timeSeriesDataPromises.push(Promise.all([...stagePromises, ...twPromises, ...hingePointPromises, ...tainterPromises, ...rollerPromises, timeSeriesDataExtentsApiCall()]));
                         }
                     }
 
