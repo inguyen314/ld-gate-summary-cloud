@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     let setLocationCategory = null;
     let setLocationGroupOwner = null;
     let setTimeseriesGroup1 = null;
+    let setTimeseriesGroup2 = null;
     let setLookBackHours = null;
     let reportDiv = null;
 
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         setLocationCategory = "Basins";
         setLocationGroupOwner = "Ld-Gate-Summary";
         setTimeseriesGroup1 = "Stage";
+        setTimeseriesGroup2 = "Stage-TW";
         setLookBackHours = subtractDaysFromDate(new Date(), 2);
     }
 
@@ -29,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     console.log("setLocationCategory: ", setLocationCategory);
     console.log("setLocationGroupOwner: ", setLocationGroupOwner);
     console.log("setTimeseriesGroup1: ", setTimeseriesGroup1);
+    console.log("setTimeseriesGroup2: ", setTimeseriesGroup2);
     console.log("setLookBackHours: ", setLookBackHours);
 
     let setBaseUrl = null;
@@ -51,6 +54,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const ownerMap = new Map();
     const tsidStageMap = new Map();
     const riverMileMap = new Map();
+    const tsidTwMap = new Map();
 
     // Initialize arrays for storing promises
     const metadataPromises = [];
@@ -59,6 +63,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const ownerPromises = [];
     const stageTsidPromises = [];
     const riverMilePromises = [];
+    const twTsidPromises = [];
 
     // Fetch location group data from the API
     fetch(categoryApiUrl)
@@ -283,26 +288,49 @@ document.addEventListener('DOMContentLoaded', async function () {
                                         }
                                     })();
 
-                                    // Fetch tsid
+                                    // Fetch tsid 1
                                     (() => {
                                         // Fetch datman TSID data
-                                        const tsidDatmanApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup1}?office=${office}&category-id=${loc['location-id']}`;
-                                        // console.log('tsidDatmanApiUrl:', tsidDatmanApiUrl);
+                                        const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup1}?office=${office}&category-id=${loc['location-id']}`;
+                                        // console.log('tsidApiUrl:', tsidApiUrl);
                                         stageTsidPromises.push(
-                                            fetch(tsidDatmanApiUrl)
+                                            fetch(tsidApiUrl)
                                                 .then(response => {
                                                     if (response.status === 404) return null; // Skip if not found
                                                     if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                                                     return response.json();
                                                 })
-                                                .then(tsidData => {
-                                                    // // console.log('tsidData:', tsidData);
-                                                    if (tsidData) {
-                                                        tsidStageMap.set(loc['location-id'], tsidData);
+                                                .then(data => {
+                                                    // // console.log('data:', data);
+                                                    if (data) {
+                                                        tsidStageMap.set(loc['location-id'], data);
                                                     }
                                                 })
                                                 .catch(error => {
-                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidDatmanApiUrl}:`, error);
+                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                })
+                                        );
+                                    })();
+
+                                    // Fetch tsid 2
+                                    (() => {
+                                        const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup2}?office=${office}&category-id=${loc['location-id']}`;
+                                        // console.log('tsidApiUrl:', tsidApiUrl);
+                                        stageTsidPromises.push(
+                                            fetch(tsidApiUrl)
+                                                .then(response => {
+                                                    if (response.status === 404) return null; // Skip if not found
+                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                                    return response.json();
+                                                })
+                                                .then(data => {
+                                                    // // console.log('data:', data);
+                                                    if (data) {
+                                                        tsidTwMap.set(loc['location-id'], data);
+                                                    }
+                                                })
+                                                .catch(error => {
+                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
                                                 })
                                         );
                                     })();
@@ -323,6 +351,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 .then(() => Promise.all(ownerPromises))
                 .then(() => Promise.all(stageTsidPromises))
                 .then(() => Promise.all(riverMilePromises))
+                .then(() => Promise.all(twTsidPromises))
                 .then(() => {
                     combinedData.forEach(basinData => {
                         if (basinData['assigned-locations']) {
@@ -355,18 +384,41 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     loc['owner'] = ownerMapData;
                                 }
 
-                                // Append tsid
+                                // Append tsid 1
                                 const tsidStageMapData = tsidStageMap.get(loc['location-id']);
                                 if (tsidStageMapData) {
                                     reorderByAttribute(tsidStageMapData);
                                     loc['tsid-stage'] = tsidStageMapData;
                                 } else {
-                                    loc['tsid-stage'] = null;  // Append null if missing
+                                    loc['tsid-stage'] = null;
+                                }
+
+                                // Append tsid 2
+                                const tsidTwMapData = tsidTwMap.get(loc['location-id']);
+                                if (tsidTwMapData) {
+                                    reorderByAttribute(tsidTwMapData);
+                                    loc['tsid-tw'] = tsidTwMapData;
+                                } else {
+                                    loc['tsid-tw'] = null;
                                 }
 
                                 // Initialize empty arrays to hold API and last-value data for various parameters
                                 loc['stage-api-data'] = [];
+                                loc['stage-cum-value'] = [];
+                                loc['stage-hourly-value'] = [];
+                                loc['stage-inc-value'] = [];
                                 loc['stage-last-value'] = [];
+                                loc['stage-max-value'] = [];
+                                loc['stage-min-value'] = [];
+
+
+                                loc['tw-api-data'] = [];
+                                loc['tw-cum-value'] = [];
+                                loc['tw-hourly-value'] = [];
+                                loc['tw-inc-value'] = [];
+                                loc['tw-last-value'] = [];
+                                loc['tw-max-value'] = [];
+                                loc['tw-min-value'] = [];
                             });
                         }
                     });
@@ -378,13 +430,16 @@ document.addEventListener('DOMContentLoaded', async function () {
                     // Iterate over all arrays in combinedData
                     for (const dataArray of combinedData) {
                         for (const locData of dataArray['assigned-locations'] || []) {
-                            // Handle temperature, depth, and DO time series
-                            const datmanTimeSeries = locData['tsid-stage']?.['assigned-time-series'] || [];
+                            // Setup time series id
+                            const stageTimeSeries = locData['tsid-stage']?.['assigned-time-series'] || [];
+                            const twTimeSeries = locData['tsid-tw']?.['assigned-time-series'] || [];
+                            // console.log("twTimeSeries: ", twTimeSeries);
 
                             // Function to create fetch promises for time series data
                             const timeSeriesDataFetchPromises = (timeSeries, type) => {
                                 return timeSeries.map((series, index) => {
                                     const tsid = series['timeseries-id'];
+                                    // console.log("tsid: ", tsid);
                                     const timeSeriesDataApiUrl = setBaseUrl + `timeseries?page-size=5000&name=${tsid}&begin=${setLookBackHours.toISOString()}&end=${currentDateTime.toISOString()}&office=${office}`;
                                     // console.log('timeSeriesDataApiUrl:', timeSeriesDataApiUrl);
 
@@ -405,116 +460,198 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                 });
                                             }
 
-                                            let apiDataKey;
-                                            if (type === 'datman') {
-                                                apiDataKey = 'stage-api-data';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
+                                            // Append api-data
+                                            (() => {
+                                                // Determine the API data key based on the type
+                                                let apiDataKey;
+                                                switch (type) {
+                                                    case 'stage':
+                                                        apiDataKey = 'stage-api-data';
+                                                        break;
+                                                    case 'tw':
+                                                        apiDataKey = 'tw-api-data';
+                                                        break;
+                                                    default:
+                                                        console.error('Unknown type:', type);
+                                                        return; // Exit early for unknown type
+                                                }
 
-                                            locData[apiDataKey].push(data);
+                                                // Initialize location data if not already set
+                                                if (!locData[data]) {
+                                                    locData[data] = [];
+                                                }
 
-                                            let lastValueKey;
-                                            if (type === 'datman') {
-                                                lastValueKey = 'stage-last-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
+                                                // Push the data to the appropriate API data key
+                                                locData[apiDataKey].push(data);
+                                            })();
 
-                                            let maxValueKey;
-                                            if (type === 'datman') {
-                                                maxValueKey = 'stage-max-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
+                                            // Append last-value
+                                            (() => {
+                                                const lastValue = getLastNonNullValue(data, tsid);
+                                                // console.log("lastValue: ", lastValue);
 
-                                            let minValueKey;
-                                            if (type === 'datman') {
-                                                minValueKey = 'stage-min-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
+                                                // Determine the API data key based on the type
+                                                let lastValueKey;
+                                                switch (type) {
+                                                    case 'stage':
+                                                        lastValueKey = 'stage-last-value';
+                                                        break;
+                                                    case 'tw':
+                                                        lastValueKey = 'tw-last-value';
+                                                        break;
+                                                    default:
+                                                        console.error('Unknown type:', type);
+                                                        return; // Exit early for unknown type
+                                                }
 
-                                            let cumValueKey;
-                                            if (type === 'datman') {
-                                                cumValueKey = 'stage-cum-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
+                                                // Initialize location data if not already set
+                                                if (!locData[lastValue]) {
+                                                    locData[lastValue] = [];
+                                                }
 
-                                            let incValueKey;
-                                            if (type === 'datman') {
-                                                incValueKey = 'stage-inc-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
+                                                // Push the data to the appropriate API data key
+                                                locData[lastValueKey].push(lastValue);
+                                            })();
 
-                                            let hourlyValueKey;
-                                            if (type === 'datman') {
-                                                hourlyValueKey = 'stage-hourly-value';
-                                            } else {
-                                                console.error('Unknown type:', type);
-                                                return;
-                                            }
+                                            // Append max-value
+                                            (() => {
+                                                const maxValue = getMaxValue(data, tsid);
+                                                // console.log("maxValue: ", maxValue);
 
-                                            if (!locData[lastValueKey]) {
-                                                locData[lastValueKey] = [];
-                                            }
+                                                // Determine the API data key based on the type
+                                                let maxValueKey;
+                                                switch (type) {
+                                                    case 'stage':
+                                                        maxValueKey = 'stage-max-value';
+                                                        break;
+                                                    case 'tw':
+                                                        maxValueKey = 'tw-max-value';
+                                                        break;
+                                                    default:
+                                                        console.error('Unknown type:', type);
+                                                        return; // Exit early for unknown type
+                                                }
 
-                                            if (!locData[maxValueKey]) {
-                                                locData[maxValueKey] = [];
-                                            }
+                                                // Initialize location data if not already set
+                                                if (!locData[maxValue]) {
+                                                    locData[maxValue] = [];
+                                                }
 
-                                            if (!locData[minValueKey]) {
-                                                locData[minValueKey] = [];
-                                            }
+                                                // Push the data to the appropriate API data key
+                                                locData[maxValueKey].push(maxValue);
+                                            })();
 
-                                            if (!locData[cumValueKey]) {
-                                                locData[cumValueKey] = [];
-                                            }
+                                            // Append min-value
+                                            (() => {
+                                                const minValue = getMinValue(data, tsid);
+                                                // console.log("maxValue: ", maxValue);
 
-                                            if (!locData[incValueKey]) {
-                                                locData[incValueKey] = [];
-                                            }
+                                                // Determine the API data key based on the type
+                                                let minValueKey;
+                                                switch (type) {
+                                                    case 'stage':
+                                                        minValueKey = 'stage-min-value';
+                                                        break;
+                                                    case 'tw':
+                                                        minValueKey = 'tw-min-value';
+                                                        break;
+                                                    default:
+                                                        console.error('Unknown type:', type);
+                                                        return; // Exit early for unknown type
+                                                }
 
-                                            if (!locData[hourlyValueKey]) {
-                                                locData[hourlyValueKey] = [];
-                                            }
+                                                // Initialize location data if not already set
+                                                if (!locData[minValue]) {
+                                                    locData[minValue] = [];
+                                                }
 
-                                            const lastValue = getLastNonNullValue(data, tsid);
+                                                // Push the data to the appropriate API data key
+                                                locData[minValueKey].push(minValue);
+                                            })();
 
-                                            const maxValue = getMaxValue(data, tsid);
-                                            // console.log("maxValue: ", maxValue);
+                                            // Append inc-value
+                                            (() => {
+                                                const incValue = getIncValue(data, tsid);
+                                                // console.log("incValue: ", incValue);
 
-                                            const minValue = getMinValue(data, tsid);
-                                            // console.log("minValue: ", minValue);
+                                                // Determine the API data key based on the type
+                                                let incValueKey;
+                                                switch (type) {
+                                                    case 'stage':
+                                                        incValueKey = 'stage-inc-value';
+                                                        break;
+                                                    case 'tw':
+                                                        incValueKey = 'tw-inc-value';
+                                                        break;
+                                                    default:
+                                                        console.error('Unknown type:', type);
+                                                        return; // Exit early for unknown type
+                                                }
 
-                                            const cumValue = getCumValue(data, tsid);
-                                            // console.log("cumValue: ", cumValue);
+                                                // Initialize location data if not already set
+                                                if (!locData[incValue]) {
+                                                    locData[incValue] = [];
+                                                }
 
-                                            const incValue = getIncValue(data, tsid);
-                                            // console.log("incValue: ", incValue);
+                                                // Push the data to the appropriate API data key
+                                                locData[incValueKey].push(incValue);
+                                            })();
 
-                                            const hourlyValue = getHourlyDataOnTopOfHour(data, tsid);
+                                            // Append cum-value
+                                            (() => {
+                                                const cumValue = getCumValue(data, tsid);
+                                                // console.log("cumValue: ", cumValue);
+
+                                                // Determine the API data key based on the type
+                                                let cumValueKey;
+                                                switch (type) {
+                                                    case 'stage':
+                                                        cumValueKey = 'stage-cum-value';
+                                                        break;
+                                                    case 'tw':
+                                                        cumValueKey = 'tw-cum-value';
+                                                        break;
+                                                    default:
+                                                        console.error('Unknown type:', type);
+                                                        return; // Exit early for unknown type
+                                                }
+
+                                                // Initialize location data if not already set
+                                                if (!locData[cumValue]) {
+                                                    locData[cumValue] = [];
+                                                }
+
+                                                // Push the data to the appropriate API data key
+                                                locData[cumValueKey].push(cumValue);
+                                            })();
+
+                                            // Append hourly-value
+                                            (() => {
+                                                const hourlyValue = getHourlyDataOnTopOfHour(data, tsid);
                                             // console.log("hourlyValue: ", hourlyValue);
 
-                                            locData[lastValueKey].push(lastValue);
+                                                // Determine the API data key based on the type
+                                                let hourlyValueKey;
+                                                switch (type) {
+                                                    case 'stage':
+                                                        hourlyValueKey = 'stage-hourly-value';
+                                                        break;
+                                                    case 'tw':
+                                                        hourlyValueKey = 'tw-hourly-value';
+                                                        break;
+                                                    default:
+                                                        console.error('Unknown type:', type);
+                                                        return; // Exit early for unknown type
+                                                }
 
-                                            locData[maxValueKey].push(maxValue);
+                                                // Initialize location data if not already set
+                                                if (!locData[hourlyValue]) {
+                                                    locData[hourlyValue] = [];
+                                                }
 
-                                            locData[minValueKey].push(minValue);
-
-                                            locData[cumValueKey].push(cumValue);
-
-                                            locData[incValueKey].push(incValue);
-
-                                            locData[hourlyValueKey].push(hourlyValue);
+                                                // Push the data to the appropriate API data key
+                                                locData[hourlyValueKey].push(hourlyValue);
+                                            })();
                                         })
 
                                         .catch(error => {
@@ -523,8 +660,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                                 });
                             };
 
-                            // Create promises for temperature, depth, and DO time series
-                            const datmanPromises = timeSeriesDataFetchPromises(datmanTimeSeries, 'datman');
+                            // Create promises time series
+                            const stagePromises = timeSeriesDataFetchPromises(stageTimeSeries, 'stage');
+                            const twPromises = timeSeriesDataFetchPromises(twTimeSeries, 'tw');
 
                             // Additional API call for extents data
                             const timeSeriesDataExtentsApiCall = async (type) => {
@@ -543,8 +681,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     locData[`extents-data`] = {};
 
                                     // Collect TSIDs from temp, depth, and DO time series
-                                    const datmanTids = datmanTimeSeries.map(series => series['timeseries-id']);
-                                    const allTids = [...datmanTids]; // Combine both arrays
+                                    const stageTids = stageTimeSeries.map(series => series['timeseries-id']);
+                                    const twTids = twTimeSeries.map(series => series['timeseries-id']);
+                                    const allTids = [...stageTids, ...twTids]; // Combine both arrays
 
                                     allTids.forEach((tsid, index) => {
                                         const matchingEntry = data.entries.find(entry => entry['name'] === tsid);
@@ -611,7 +750,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                             };
 
                             // Combine all promises for this location
-                            timeSeriesDataPromises.push(Promise.all([...datmanPromises, timeSeriesDataExtentsApiCall()]));
+                            timeSeriesDataPromises.push(Promise.all([...stagePromises, ...twPromises, timeSeriesDataExtentsApiCall()]));
                         }
                     }
 
