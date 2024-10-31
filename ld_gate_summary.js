@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     let setLocationGroupOwner = null;
     let setTimeseriesGroup1 = null;
     let setTimeseriesGroup2 = null;
+    let setTimeseriesGroup3 = null;
     let setLookBackHours = null;
     let reportDiv = null;
 
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         setLocationGroupOwner = "Ld-Gate-Summary";
         setTimeseriesGroup1 = "Stage";
         setTimeseriesGroup2 = "Stage-TW";
+        setTimeseriesGroup3 = "Hinge-Point";
         setLookBackHours = subtractDaysFromDate(new Date(), 2);
     }
 
@@ -32,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     console.log("setLocationGroupOwner: ", setLocationGroupOwner);
     console.log("setTimeseriesGroup1: ", setTimeseriesGroup1);
     console.log("setTimeseriesGroup2: ", setTimeseriesGroup2);
+    console.log("setTimeseriesGroup3: ", setTimeseriesGroup3);
     console.log("setLookBackHours: ", setLookBackHours);
 
     let setBaseUrl = null;
@@ -55,6 +58,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const tsidStageMap = new Map();
     const riverMileMap = new Map();
     const tsidTwMap = new Map();
+    const tsidHingePointMap = new Map();
 
     // Initialize arrays for storing promises
     const metadataPromises = [];
@@ -64,6 +68,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const stageTsidPromises = [];
     const riverMilePromises = [];
     const twTsidPromises = [];
+    const hingePointTsidPromises = [];
 
     // Fetch location group data from the API
     fetch(categoryApiUrl)
@@ -316,7 +321,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     (() => {
                                         const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup2}?office=${office}&category-id=${loc['location-id']}`;
                                         // console.log('tsidApiUrl:', tsidApiUrl);
-                                        stageTsidPromises.push(
+                                        twTsidPromises.push(
                                             fetch(tsidApiUrl)
                                                 .then(response => {
                                                     if (response.status === 404) return null; // Skip if not found
@@ -327,6 +332,29 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                     // // console.log('data:', data);
                                                     if (data) {
                                                         tsidTwMap.set(loc['location-id'], data);
+                                                    }
+                                                })
+                                                .catch(error => {
+                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                })
+                                        );
+                                    })();
+
+                                    // Fetch tsid 3
+                                    (() => {
+                                        const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup3}?office=${office}&category-id=${loc['location-id']}`;
+                                        // console.log('tsidApiUrl:', tsidApiUrl);
+                                        hingePointTsidPromises.push(
+                                            fetch(tsidApiUrl)
+                                                .then(response => {
+                                                    if (response.status === 404) return null; // Skip if not found
+                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                                    return response.json();
+                                                })
+                                                .then(data => {
+                                                    // // console.log('data:', data);
+                                                    if (data) {
+                                                        tsidHingePointMap.set(loc['location-id'], data);
                                                     }
                                                 })
                                                 .catch(error => {
@@ -352,6 +380,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 .then(() => Promise.all(stageTsidPromises))
                 .then(() => Promise.all(riverMilePromises))
                 .then(() => Promise.all(twTsidPromises))
+                .then(() => Promise.all(hingePointTsidPromises))
                 .then(() => {
                     combinedData.forEach(basinData => {
                         if (basinData['assigned-locations']) {
@@ -402,6 +431,15 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     loc['tsid-tw'] = null;
                                 }
 
+                                // Append tsid 3
+                                const tsidHingePointMapData = tsidHingePointMap.get(loc['location-id']);
+                                if (tsidHingePointMapData) {
+                                    reorderByAttribute(tsidHingePointMapData);
+                                    loc['tsid-hinge-point'] = tsidHingePointMapData;
+                                } else {
+                                    loc['tsid-hinge-point'] = null;
+                                }
+
                                 // Initialize empty arrays to hold API and last-value data for various parameters
                                 loc['stage-api-data'] = [];
                                 loc['stage-cum-value'] = [];
@@ -419,6 +457,14 @@ document.addEventListener('DOMContentLoaded', async function () {
                                 loc['tw-last-value'] = [];
                                 loc['tw-max-value'] = [];
                                 loc['tw-min-value'] = [];
+
+                                loc['hinge-point-api-data'] = [];
+                                loc['hinge-point-cum-value'] = [];
+                                loc['hinge-point-hourly-value'] = [];
+                                loc['hinge-point-inc-value'] = [];
+                                loc['hinge-point-last-value'] = [];
+                                loc['hinge-point-max-value'] = [];
+                                loc['hinge-point-min-value'] = [];
                             });
                         }
                     });
@@ -433,7 +479,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                             // Setup time series id
                             const stageTimeSeries = locData['tsid-stage']?.['assigned-time-series'] || [];
                             const twTimeSeries = locData['tsid-tw']?.['assigned-time-series'] || [];
-                            // console.log("twTimeSeries: ", twTimeSeries);
+                            const hingePointTimeSeries = locData['tsid-tw']?.['assigned-time-series'] || [];
 
                             // Function to create fetch promises for time series data
                             const timeSeriesDataFetchPromises = (timeSeries, type) => {
@@ -471,6 +517,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                     case 'tw':
                                                         apiDataKey = 'tw-api-data';
                                                         break;
+                                                    case 'hinge-point':
+                                                        apiDataKey = 'hinge-point-api-data';
+                                                        break;
                                                     default:
                                                         console.error('Unknown type:', type);
                                                         return; // Exit early for unknown type
@@ -498,6 +547,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                         break;
                                                     case 'tw':
                                                         lastValueKey = 'tw-last-value';
+                                                        break;
+                                                    case 'hinge-point':
+                                                        lastValueKey = 'hinge-point-last-value';
                                                         break;
                                                     default:
                                                         console.error('Unknown type:', type);
@@ -527,6 +579,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                     case 'tw':
                                                         maxValueKey = 'tw-max-value';
                                                         break;
+                                                    case 'hinge-point':
+                                                        maxValueKey = 'hinge-point-max-value';
+                                                        break;
                                                     default:
                                                         console.error('Unknown type:', type);
                                                         return; // Exit early for unknown type
@@ -554,6 +609,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                         break;
                                                     case 'tw':
                                                         minValueKey = 'tw-min-value';
+                                                        break;
+                                                    case 'hinge-point':
+                                                        minValueKey = 'hinge-point-min-value';
                                                         break;
                                                     default:
                                                         console.error('Unknown type:', type);
@@ -583,6 +641,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                     case 'tw':
                                                         incValueKey = 'tw-inc-value';
                                                         break;
+                                                    case 'hinge-point':
+                                                        incValueKey = 'hinge-point-inc-value';
+                                                        break;
                                                     default:
                                                         console.error('Unknown type:', type);
                                                         return; // Exit early for unknown type
@@ -611,6 +672,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                     case 'tw':
                                                         cumValueKey = 'tw-cum-value';
                                                         break;
+                                                    case 'hinge-point':
+                                                        cumValueKey = 'hinge-point-cum-value';
+                                                        break;
                                                     default:
                                                         console.error('Unknown type:', type);
                                                         return; // Exit early for unknown type
@@ -628,7 +692,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                                             // Append hourly-value
                                             (() => {
                                                 const hourlyValue = getHourlyDataOnTopOfHour(data, tsid);
-                                            // console.log("hourlyValue: ", hourlyValue);
+                                                // console.log("hourlyValue: ", hourlyValue);
 
                                                 // Determine the API data key based on the type
                                                 let hourlyValueKey;
@@ -638,6 +702,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                         break;
                                                     case 'tw':
                                                         hourlyValueKey = 'tw-hourly-value';
+                                                        break;
+                                                    case 'hinge-point':
+                                                        hourlyValueKey = 'hinge-point-hourly-value';
                                                         break;
                                                     default:
                                                         console.error('Unknown type:', type);
@@ -663,6 +730,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                             // Create promises time series
                             const stagePromises = timeSeriesDataFetchPromises(stageTimeSeries, 'stage');
                             const twPromises = timeSeriesDataFetchPromises(twTimeSeries, 'tw');
+                            const hingePointPromises = timeSeriesDataFetchPromises(hingePointTimeSeries, 'hinge-point');
 
                             // Additional API call for extents data
                             const timeSeriesDataExtentsApiCall = async (type) => {
@@ -683,7 +751,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     // Collect TSIDs from temp, depth, and DO time series
                                     const stageTids = stageTimeSeries.map(series => series['timeseries-id']);
                                     const twTids = twTimeSeries.map(series => series['timeseries-id']);
-                                    const allTids = [...stageTids, ...twTids]; // Combine both arrays
+                                    const hingePointTids = twTimeSeries.map(series => series['timeseries-id']);
+                                    const allTids = [...stageTids, ...twTids, ...hingePointTids]; // Combine both arrays
 
                                     allTids.forEach((tsid, index) => {
                                         const matchingEntry = data.entries.find(entry => entry['name'] === tsid);
@@ -750,7 +819,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                             };
 
                             // Combine all promises for this location
-                            timeSeriesDataPromises.push(Promise.all([...stagePromises, ...twPromises, timeSeriesDataExtentsApiCall()]));
+                            timeSeriesDataPromises.push(Promise.all([...stagePromises, ...twPromises, ...hingePointPromises, timeSeriesDataExtentsApiCall()]));
                         }
                     }
 
