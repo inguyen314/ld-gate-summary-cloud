@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         reportDiv = "ld_gate_summary";
         setLocationCategory = "Basins";
         setLocationGroupOwner = "Ld-Gate-Summary";
-        setTimeseriesGroup1 = "Precip";
-        setLookBackHours = subtractDaysFromDate(new Date(), 4);
+        setTimeseriesGroup1 = "Stage";
+        setLookBackHours = subtractDaysFromDate(new Date(), 1);
     }
 
     // Display the loading indicator for water quality alarm
@@ -449,6 +449,14 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                 return; // Early return if the type is unknown
                                             }
 
+                                            let hourlyValueKey;
+                                            if (type === 'datman') {
+                                                hourlyValueKey = 'datman-hourly-value';
+                                            } else {
+                                                console.error('Unknown type:', type);
+                                                return; // Early return if the type is unknown
+                                            }
+
                                             if (!locData[lastValueKey]) {
                                                 locData[lastValueKey] = [];  // Initialize as an array if it doesn't exist
                                             }
@@ -467,6 +475,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                                             if (!locData[incValueKey]) {
                                                 locData[incValueKey] = [];  // Initialize as an array if it doesn't exist
+                                            }
+
+                                            if (!locData[hourlyValueKey]) {
+                                                locData[hourlyValueKey] = [];  // Initialize as an array if it doesn't exist
                                             }
 
                                             // Get and store the last non-null value for the specific tsid
@@ -488,6 +500,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                                             const incValue = getIncValue(data, tsid);
                                             // console.log("incValue: ", incValue);
 
+                                            // Get and store the last min value for the specific tsid
+                                            const hourlyValue = getHourlyDataOnTopOfHour(data, tsid);
+                                            // console.log("hourlyValue: ", hourlyValue);
+
                                             // Push the last non-null value to the corresponding last-value array
                                             locData[lastValueKey].push(lastValue);
 
@@ -502,6 +518,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                                             // Push the last non-null value to the corresponding last-value array
                                             locData[incValueKey].push(incValue);
+
+                                            // Push the last non-null value to the corresponding last-value array
+                                            locData[hourlyValueKey].push(hourlyValue);
                                         })
 
                                         .catch(error => {
@@ -1198,6 +1217,23 @@ function getIncValue(data, tsid) {
         ...incrementalValues, // Spread operator to include incremental values in the return object
         // ...cumulativeValues // Spread operator to include cumulative values in the return object
     };
+}
+
+function getHourlyDataOnTopOfHour(data, tsid) {
+    const hourlyData = [];
+
+    data.values.forEach(entry => {
+        const [timestamp, value, qualityCode] = entry;
+        const date = new Date(timestamp);
+
+        // Check if the time is exactly at the top of the hour
+        if (date.getMinutes() === 0) {
+            // Append tsid to the object
+            hourlyData.push({ timestamp, value, qualityCode, tsid });
+        }
+    });
+
+    return hourlyData;
 }
 
 function hasLastValue(data) {
