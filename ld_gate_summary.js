@@ -639,6 +639,27 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                     console.log('Filtered all basin where assigned-locations is null successfully:', combinedData);
 
+                    // Step 5: Filter out basin order
+                    const sortOrderBasin = ['Mississippi', 'Kaskaskia'];
+
+                    // Sort the combinedData array based on the sortOrderBasin
+                    combinedData.sort((a, b) => {
+                        const indexA = sortOrderBasin.indexOf(a.id); // Assuming 'id' represents the basin name
+                        const indexB = sortOrderBasin.indexOf(b.id); // Assuming 'id' represents the basin name
+
+                        // If both basins are found in the sortOrderBasin, sort based on their indices
+                        if (indexA !== -1 && indexB !== -1) {
+                            return indexA - indexB; // Sort based on order in sortOrderBasin
+                        }
+                        // If one is not found, put it at the end
+                        return indexA === -1 ? 1 : -1;
+                    });
+
+                    // Log the sorted combinedData for verification
+                    console.log("Sorted combinedData: ", combinedData);
+
+
+
                     const timeSeriesDataPromises = [];
 
                     // Iterate over all arrays in combinedData
@@ -1458,7 +1479,7 @@ function createTableLdGateSummary(combinedData, type, reportNumber) {
     combinedData.forEach((basin) => {
         // Loop through each assigned location in the basin
         basin['assigned-locations'].forEach((location) => {
-            console.log("location-id: ", location['location-id']);
+            // console.log("location-id: ", location['location-id']);
 
             // Create a row for the location ID spanning 6 columns
             const locationRow = document.createElement('tr');
