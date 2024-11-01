@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             let basins = filteredArray.map(item => item.id);
             console.log("basins: ", basins);
 
-            // ********************************** Remove Basins ***************************************************
+            // Set basins to current basin if set in the url
             // basins = basins.filter(basinId => basin.includes(basinId));
             // console.log("basins: ", basins);
 
@@ -142,281 +142,283 @@ document.addEventListener('DOMContentLoaded', async function () {
                             // If assigned locations exist, fetch metadata and time-series data
                             if (getBasin['assigned-locations']) {
                                 getBasin['assigned-locations'].forEach(loc => {
-
-                                    // Fetch river-mile
+                                    // Fetch data
                                     (() => {
-                                        // riverMilePromises.push(
-                                        //     fetch('json/gage_control_official.json')
-                                        //         .then(response => {
-                                        //             if (!response.ok) {
-                                        //                 throw new Error(`Network response was not ok: ${response.statusText}`);
-                                        //             }
-                                        //             return response.json();
-                                        //         })
-                                        //         .then(riverMilesJson => {
-                                        //             // Loop through each basin in the JSON
-                                        //             for (const basin in riverMilesJson) {
-                                        //                 const locations = riverMilesJson[basin];
+                                        // Fetch river-mile
+                                        (() => {
+                                            // riverMilePromises.push(
+                                            //     fetch('json/gage_control_official.json')
+                                            //         .then(response => {
+                                            //             if (!response.ok) {
+                                            //                 throw new Error(`Network response was not ok: ${response.statusText}`);
+                                            //             }
+                                            //             return response.json();
+                                            //         })
+                                            //         .then(riverMilesJson => {
+                                            //             // Loop through each basin in the JSON
+                                            //             for (const basin in riverMilesJson) {
+                                            //                 const locations = riverMilesJson[basin];
 
-                                        //                 for (const loc in locations) {
-                                        //                     const ownerData = locations[loc];
-                                        //                     // console.log("ownerData: ", ownerData);
+                                            //                 for (const loc in locations) {
+                                            //                     const ownerData = locations[loc];
+                                            //                     // console.log("ownerData: ", ownerData);
 
-                                        //                     // Retrieve river mile and other data
-                                        //                     const riverMile = ownerData.river_mile_hard_coded;
+                                            //                     // Retrieve river mile and other data
+                                            //                     const riverMile = ownerData.river_mile_hard_coded;
 
-                                        //                     // Create an output object using the location name as ID
-                                        //                     const outputData = {
-                                        //                         locationId: loc, // Using location name as ID
-                                        //                         basin: basin,
-                                        //                         riverMile: riverMile
-                                        //                     };
+                                            //                     // Create an output object using the location name as ID
+                                            //                     const outputData = {
+                                            //                         locationId: loc, // Using location name as ID
+                                            //                         basin: basin,
+                                            //                         riverMile: riverMile
+                                            //                     };
 
-                                        //                     // console.log("Output Data:", outputData);
-                                        //                     riverMileMap.set(loc, ownerData); // Store the data in the map
-                                        //                 }
-                                        //             }
-                                        //         })
-                                        //         .catch(error => {
-                                        //             console.error('Problem with the fetch operation:', error);
-                                        //         })
-                                        // )
-                                    })();
+                                            //                     // console.log("Output Data:", outputData);
+                                            //                     riverMileMap.set(loc, ownerData); // Store the data in the map
+                                            //                 }
+                                            //             }
+                                            //         })
+                                            //         .catch(error => {
+                                            //             console.error('Problem with the fetch operation:', error);
+                                            //         })
+                                            // )
+                                        })();
 
-                                    // Fetch metadata
-                                    (() => {
-                                        // const locApiUrl = setBaseUrl + `locations/${loc['location-id']}?office=${office}`;
-                                        // // console.log("locApiUrl: ", locApiUrl);
-                                        // metadataPromises.push(
-                                        //     fetch(locApiUrl)
-                                        //         .then(response => {
-                                        //             if (response.status === 404) {
-                                        //                 console.warn(`Location metadata not found for location: ${loc['location-id']}`);
-                                        //                 return null; // Skip if not found
-                                        //             }
-                                        //             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                                        //             return response.json();
-                                        //         })
-                                        //         .then(locData => {
-                                        //             if (locData) {
-                                        //                 metadataMap.set(loc['location-id'], locData);
-                                        //             }
-                                        //         })
-                                        //         .catch(error => {
-                                        //             console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
-                                        //         })
-                                        // );
-                                    })();
+                                        // Fetch metadata
+                                        (() => {
+                                            // const locApiUrl = setBaseUrl + `locations/${loc['location-id']}?office=${office}`;
+                                            // // console.log("locApiUrl: ", locApiUrl);
+                                            // metadataPromises.push(
+                                            //     fetch(locApiUrl)
+                                            //         .then(response => {
+                                            //             if (response.status === 404) {
+                                            //                 console.warn(`Location metadata not found for location: ${loc['location-id']}`);
+                                            //                 return null; // Skip if not found
+                                            //             }
+                                            //             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                            //             return response.json();
+                                            //         })
+                                            //         .then(locData => {
+                                            //             if (locData) {
+                                            //                 metadataMap.set(loc['location-id'], locData);
+                                            //             }
+                                            //         })
+                                            //         .catch(error => {
+                                            //             console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
+                                            //         })
+                                            // );
+                                        })();
 
-                                    // Fetch flood
-                                    (() => {
-                                        // // Fetch flood location level for each location
-                                        // const levelIdFlood = loc['location-id'] + ".Stage.Inst.0.Flood";
-                                        // // console.log("levelIdFlood: ", levelIdFlood);
+                                        // Fetch flood
+                                        (() => {
+                                            // // Fetch flood location level for each location
+                                            // const levelIdFlood = loc['location-id'] + ".Stage.Inst.0.Flood";
+                                            // // console.log("levelIdFlood: ", levelIdFlood);
 
-                                        // const levelIdEffectiveDate = "2024-01-01T08:00:00";
-                                        // // console.log("levelIdEffectiveDate: ", levelIdEffectiveDate);
+                                            // const levelIdEffectiveDate = "2024-01-01T08:00:00";
+                                            // // console.log("levelIdEffectiveDate: ", levelIdEffectiveDate);
 
-                                        // const floodApiUrl = setBaseUrl + `levels/${levelIdFlood}?office=${office}&effective-date=${levelIdEffectiveDate}&unit=ft`;
-                                        // // console.log("floodApiUrl: ", floodApiUrl);
-                                        // floodPromises.push(
-                                        //     fetch(floodApiUrl)
-                                        //         .then(response => {
-                                        //             if (response.status === 404) {
-                                        //                 console.warn(`Location metadata not found for location: ${loc['location-id']}`);
-                                        //                 return null; // Skip if not found
-                                        //             }
-                                        //             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                                        //             return response.json();
-                                        //         })
-                                        //         .then(floodData => {
-                                        //             if (floodData) {
-                                        //                 floodMap.set(loc['location-id'], floodData);
-                                        //             }
-                                        //         })
-                                        //         .catch(error => {
-                                        //             console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
-                                        //         })
-                                        // );
-                                    })();
+                                            // const floodApiUrl = setBaseUrl + `levels/${levelIdFlood}?office=${office}&effective-date=${levelIdEffectiveDate}&unit=ft`;
+                                            // // console.log("floodApiUrl: ", floodApiUrl);
+                                            // floodPromises.push(
+                                            //     fetch(floodApiUrl)
+                                            //         .then(response => {
+                                            //             if (response.status === 404) {
+                                            //                 console.warn(`Location metadata not found for location: ${loc['location-id']}`);
+                                            //                 return null; // Skip if not found
+                                            //             }
+                                            //             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                            //             return response.json();
+                                            //         })
+                                            //         .then(floodData => {
+                                            //             if (floodData) {
+                                            //                 floodMap.set(loc['location-id'], floodData);
+                                            //             }
+                                            //         })
+                                            //         .catch(error => {
+                                            //             console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
+                                            //         })
+                                            // );
+                                        })();
 
-                                    // Fetch lwrp
-                                    (() => {
-                                        // // Fetch lwrp location level for each location
-                                        // const levelIdLwrp = loc['location-id'] + ".Stage.Inst.0.LWRP";
-                                        // // console.log("levelIdFlood: ", levelIdFlood);
+                                        // Fetch lwrp
+                                        (() => {
+                                            // // Fetch lwrp location level for each location
+                                            // const levelIdLwrp = loc['location-id'] + ".Stage.Inst.0.LWRP";
+                                            // // console.log("levelIdFlood: ", levelIdFlood);
 
-                                        // const levelIdEffectiveDate = "2024-01-01T08:00:00";
-                                        // // console.log("levelIdEffectiveDate: ", levelIdEffectiveDate);
+                                            // const levelIdEffectiveDate = "2024-01-01T08:00:00";
+                                            // // console.log("levelIdEffectiveDate: ", levelIdEffectiveDate);
 
-                                        // const lwrpApiUrl = setBaseUrl + `levels/${levelIdLwrp}?office=${office}&effective-date=${levelIdEffectiveDate}&unit=ft`;
-                                        // // console.log("lwrpApiUrl: ", lwrpApiUrl);
-                                        // lwrpPromises.push(
-                                        //     fetch(lwrpApiUrl)
-                                        //         .then(response => {
-                                        //             if (response.status === 404) {
-                                        //                 console.warn(`Location metadata not found for location: ${loc['location-id']}`);
-                                        //                 return null; // Skip if not found
-                                        //             }
-                                        //             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                                        //             return response.json();
-                                        //         })
-                                        //         .then(lwrpData => {
-                                        //             if (lwrpData) {
-                                        //                 lwrpMap.set(loc['location-id'], lwrpData);
-                                        //             }
-                                        //         })
-                                        //         .catch(error => {
-                                        //             console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
-                                        //         })
-                                        // );
-                                    })();
+                                            // const lwrpApiUrl = setBaseUrl + `levels/${levelIdLwrp}?office=${office}&effective-date=${levelIdEffectiveDate}&unit=ft`;
+                                            // // console.log("lwrpApiUrl: ", lwrpApiUrl);
+                                            // lwrpPromises.push(
+                                            //     fetch(lwrpApiUrl)
+                                            //         .then(response => {
+                                            //             if (response.status === 404) {
+                                            //                 console.warn(`Location metadata not found for location: ${loc['location-id']}`);
+                                            //                 return null; // Skip if not found
+                                            //             }
+                                            //             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                            //             return response.json();
+                                            //         })
+                                            //         .then(lwrpData => {
+                                            //             if (lwrpData) {
+                                            //                 lwrpMap.set(loc['location-id'], lwrpData);
+                                            //             }
+                                            //         })
+                                            //         .catch(error => {
+                                            //             console.error(`Problem with the fetch operation for location ${loc['location-id']}:`, error);
+                                            //         })
+                                            // );
+                                        })();
 
-                                    // Fetch owner
-                                    (() => {
-                                        // Fetch owner for each location
-                                        let ownerApiUrl = setBaseUrl + `location/group/${setLocationGroupOwner}?office=${office}&category-id=${office}`;
-                                        // console.log("ownerApiUrl: ", ownerApiUrl);
-                                        if (ownerApiUrl) {
-                                            ownerPromises.push(
-                                                fetch(ownerApiUrl)
+                                        // Fetch owner
+                                        (() => {
+                                            // Fetch owner for each location
+                                            let ownerApiUrl = setBaseUrl + `location/group/${setLocationGroupOwner}?office=${office}&category-id=${office}`;
+                                            // console.log("ownerApiUrl: ", ownerApiUrl);
+                                            if (ownerApiUrl) {
+                                                ownerPromises.push(
+                                                    fetch(ownerApiUrl)
+                                                        .then(response => {
+                                                            if (response.status === 404) {
+                                                                console.warn(`Datman TSID data not found for location: ${loc['location-id']}`);
+                                                                return null;
+                                                            }
+                                                            if (!response.ok) {
+                                                                throw new Error(`Network response was not ok: ${response.statusText}`);
+                                                            }
+                                                            return response.json();
+                                                        })
+                                                        .then(ownerData => {
+                                                            if (ownerData) {
+                                                                // console.log("ownerData", ownerData);
+                                                                ownerMap.set(loc['location-id'], ownerData);
+                                                            }
+                                                        })
+                                                        .catch(error => {
+                                                            console.error(`Problem with the fetch operation for stage TSID data at ${ownerApiUrl}:`, error);
+                                                        })
+                                                );
+                                            }
+                                        })();
+
+                                        // Fetch tsid
+                                        (() => {
+                                            // Fetch datman TSID data
+                                            const tsidStageApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup1}?office=${office}&category-id=${loc['location-id']}`;
+                                            // console.log('tsidStageApiUrl:', tsidStageApiUrl);
+                                            stageTsidPromises.push(
+                                                fetch(tsidStageApiUrl)
                                                     .then(response => {
-                                                        if (response.status === 404) {
-                                                            console.warn(`Datman TSID data not found for location: ${loc['location-id']}`);
-                                                            return null;
-                                                        }
-                                                        if (!response.ok) {
-                                                            throw new Error(`Network response was not ok: ${response.statusText}`);
-                                                        }
+                                                        if (response.status === 404) return null; // Skip if not found
+                                                        if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                                                         return response.json();
                                                     })
-                                                    .then(ownerData => {
-                                                        if (ownerData) {
-                                                            // console.log("ownerData", ownerData);
-                                                            ownerMap.set(loc['location-id'], ownerData);
+                                                    .then(tsidData => {
+                                                        // // console.log('tsidData:', tsidData);
+                                                        if (tsidData) {
+                                                            tsidStageMap.set(loc['location-id'], tsidData);
                                                         }
                                                     })
                                                     .catch(error => {
-                                                        console.error(`Problem with the fetch operation for stage TSID data at ${ownerApiUrl}:`, error);
+                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidStageApiUrl}:`, error);
                                                     })
                                             );
-                                        }
-                                    })();
+                                        })();
 
-                                    // Fetch tsid
-                                    (() => {
-                                        // Fetch datman TSID data
-                                        const tsidStageApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup1}?office=${office}&category-id=${loc['location-id']}`;
-                                        // console.log('tsidStageApiUrl:', tsidStageApiUrl);
-                                        stageTsidPromises.push(
-                                            fetch(tsidStageApiUrl)
-                                                .then(response => {
-                                                    if (response.status === 404) return null; // Skip if not found
-                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                                                    return response.json();
-                                                })
-                                                .then(tsidData => {
-                                                    // // console.log('tsidData:', tsidData);
-                                                    if (tsidData) {
-                                                        tsidStageMap.set(loc['location-id'], tsidData);
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidStageApiUrl}:`, error);
-                                                })
-                                        );
-                                    })();
+                                        // Fetch tsid 2
+                                        (() => {
+                                            const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup2}?office=${office}&category-id=${loc['location-id']}`;
+                                            // console.log('tsidApiUrl:', tsidApiUrl);
+                                            twTsidPromises.push(
+                                                fetch(tsidApiUrl)
+                                                    .then(response => {
+                                                        if (response.status === 404) return null; // Skip if not found
+                                                        if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                                        return response.json();
+                                                    })
+                                                    .then(data => {
+                                                        // // console.log('data:', data);
+                                                        if (data) {
+                                                            tsidTwMap.set(loc['location-id'], data);
+                                                        }
+                                                    })
+                                                    .catch(error => {
+                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                    })
+                                            );
+                                        })();
 
-                                    // Fetch tsid 2
-                                    (() => {
-                                        const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup2}?office=${office}&category-id=${loc['location-id']}`;
-                                        // console.log('tsidApiUrl:', tsidApiUrl);
-                                        twTsidPromises.push(
-                                            fetch(tsidApiUrl)
-                                                .then(response => {
-                                                    if (response.status === 404) return null; // Skip if not found
-                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                                                    return response.json();
-                                                })
-                                                .then(data => {
-                                                    // // console.log('data:', data);
-                                                    if (data) {
-                                                        tsidTwMap.set(loc['location-id'], data);
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
-                                                })
-                                        );
-                                    })();
+                                        // Fetch tsid 3
+                                        (() => {
+                                            const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup3}?office=${office}&category-id=${loc['location-id']}`;
+                                            // console.log('tsidApiUrl:', tsidApiUrl);
+                                            hingePointTsidPromises.push(
+                                                fetch(tsidApiUrl)
+                                                    .then(response => {
+                                                        if (response.status === 404) return null; // Skip if not found
+                                                        if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                                        return response.json();
+                                                    })
+                                                    .then(data => {
+                                                        // // console.log('data:', data);
+                                                        if (data) {
+                                                            tsidHingePointMap.set(loc['location-id'], data);
+                                                        }
+                                                    })
+                                                    .catch(error => {
+                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                    })
+                                            );
+                                        })();
 
-                                    // Fetch tsid 3
-                                    (() => {
-                                        const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup3}?office=${office}&category-id=${loc['location-id']}`;
-                                        // console.log('tsidApiUrl:', tsidApiUrl);
-                                        hingePointTsidPromises.push(
-                                            fetch(tsidApiUrl)
-                                                .then(response => {
-                                                    if (response.status === 404) return null; // Skip if not found
-                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                                                    return response.json();
-                                                })
-                                                .then(data => {
-                                                    // // console.log('data:', data);
-                                                    if (data) {
-                                                        tsidHingePointMap.set(loc['location-id'], data);
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
-                                                })
-                                        );
-                                    })();
+                                        // Fetch tsid 4
+                                        (() => {
+                                            const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup4}?office=${office}&category-id=${loc['location-id']}`;
+                                            // console.log('tsidApiUrl:', tsidApiUrl);
+                                            tainterTsidPromises.push(
+                                                fetch(tsidApiUrl)
+                                                    .then(response => {
+                                                        if (response.status === 404) return null; // Skip if not found
+                                                        if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                                        return response.json();
+                                                    })
+                                                    .then(data => {
+                                                        // // console.log('data:', data);
+                                                        if (data) {
+                                                            tsidTainterMap.set(loc['location-id'], data);
+                                                        }
+                                                    })
+                                                    .catch(error => {
+                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                    })
+                                            );
+                                        })();
 
-                                    // Fetch tsid 4
-                                    (() => {
-                                        const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup4}?office=${office}&category-id=${loc['location-id']}`;
-                                        // console.log('tsidApiUrl:', tsidApiUrl);
-                                        tainterTsidPromises.push(
-                                            fetch(tsidApiUrl)
-                                                .then(response => {
-                                                    if (response.status === 404) return null; // Skip if not found
-                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                                                    return response.json();
-                                                })
-                                                .then(data => {
-                                                    // // console.log('data:', data);
-                                                    if (data) {
-                                                        tsidTainterMap.set(loc['location-id'], data);
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
-                                                })
-                                        );
-                                    })();
-
-                                    // Fetch tsid 5
-                                    (() => {
-                                        const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup5}?office=${office}&category-id=${loc['location-id']}`;
-                                        // console.log('tsidApiUrl:', tsidApiUrl);
-                                        rollerTsidPromises.push(
-                                            fetch(tsidApiUrl)
-                                                .then(response => {
-                                                    if (response.status === 404) return null; // Skip if not found
-                                                    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                                                    return response.json();
-                                                })
-                                                .then(data => {
-                                                    // // console.log('data:', data);
-                                                    if (data) {
-                                                        tsidRollerMap.set(loc['location-id'], data);
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
-                                                })
-                                        );
+                                        // Fetch tsid 5
+                                        (() => {
+                                            const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup5}?office=${office}&category-id=${loc['location-id']}`;
+                                            // console.log('tsidApiUrl:', tsidApiUrl);
+                                            rollerTsidPromises.push(
+                                                fetch(tsidApiUrl)
+                                                    .then(response => {
+                                                        if (response.status === 404) return null; // Skip if not found
+                                                        if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                                        return response.json();
+                                                    })
+                                                    .then(data => {
+                                                        // // console.log('data:', data);
+                                                        if (data) {
+                                                            tsidRollerMap.set(loc['location-id'], data);
+                                                        }
+                                                    })
+                                                    .catch(error => {
+                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                    })
+                                            );
+                                        })();
                                     })();
                                 });
                             }
@@ -443,222 +445,221 @@ document.addEventListener('DOMContentLoaded', async function () {
                     combinedData.forEach(basinData => {
                         if (basinData['assigned-locations']) {
                             basinData['assigned-locations'].forEach(loc => {
+                                // Append metadata and tsid
+                                (() => {
+                                    // // Append metadata
+                                    // const metadataMapData = metadataMap.get(loc['location-id']);
+                                    // if (metadataMapData) {
+                                    //     loc['metadata'] = metadataMapData;
+                                    // }
 
-                                // // Append metadata
-                                // const metadataMapData = metadataMap.get(loc['location-id']);
-                                // if (metadataMapData) {
-                                //     loc['metadata'] = metadataMapData;
-                                // }
-
-                                // // Append flood
-                                // const floodMapData = floodMap.get(loc['location-id']);
-                                // loc['flood'] = floodMapData !== undefined ? floodMapData : null;
+                                    // // Append flood
+                                    // const floodMapData = floodMap.get(loc['location-id']);
+                                    // loc['flood'] = floodMapData !== undefined ? floodMapData : null;
 
 
-                                // // Append lwrp
-                                // const lwrpMapData = lwrpMap.get(loc['location-id']);
-                                // loc['lwrp'] = lwrpMapData !== undefined ? lwrpMapData : null;
+                                    // // Append lwrp
+                                    // const lwrpMapData = lwrpMap.get(loc['location-id']);
+                                    // loc['lwrp'] = lwrpMapData !== undefined ? lwrpMapData : null;
 
-                                // // Append river-mile
-                                // const riverMileMapData = riverMileMap.get(loc['location-id']);
-                                // if (riverMileMapData) {
-                                //     loc['river-mile'] = riverMileMapData;
-                                // }
+                                    // // Append river-mile
+                                    // const riverMileMapData = riverMileMap.get(loc['location-id']);
+                                    // if (riverMileMapData) {
+                                    //     loc['river-mile'] = riverMileMapData;
+                                    // }
 
-                                // Append owner
-                                const ownerMapData = ownerMap.get(loc['location-id']);
-                                if (ownerMapData) {
-                                    loc['owner'] = ownerMapData;
-                                }
+                                    // Append owner
+                                    const ownerMapData = ownerMap.get(loc['location-id']);
+                                    if (ownerMapData) {
+                                        loc['owner'] = ownerMapData;
+                                    }
 
-                                // Append tsid 1
-                                const tsidStageMapData = tsidStageMap.get(loc['location-id']);
-                                if (tsidStageMapData) {
-                                    reorderByAttribute(tsidStageMapData);
-                                    loc['tsid-stage'] = tsidStageMapData;
-                                } else {
-                                    loc['tsid-stage'] = null;  // Append null if missing
-                                }
+                                    // Append tsid 1
+                                    const tsidStageMapData = tsidStageMap.get(loc['location-id']);
+                                    if (tsidStageMapData) {
+                                        reorderByAttribute(tsidStageMapData);
+                                        loc['tsid-stage'] = tsidStageMapData;
+                                    } else {
+                                        loc['tsid-stage'] = null;  // Append null if missing
+                                    }
 
-                                // Append tsid 2
-                                const tsidTwMapData = tsidTwMap.get(loc['location-id']);
-                                if (tsidTwMapData) {
-                                    reorderByAttribute(tsidTwMapData);
-                                    loc['tsid-tw'] = tsidTwMapData;
-                                } else {
-                                    loc['tsid-tw'] = null;
-                                }
+                                    // Append tsid 2
+                                    const tsidTwMapData = tsidTwMap.get(loc['location-id']);
+                                    if (tsidTwMapData) {
+                                        reorderByAttribute(tsidTwMapData);
+                                        loc['tsid-tw'] = tsidTwMapData;
+                                    } else {
+                                        loc['tsid-tw'] = null;
+                                    }
 
-                                // Append tsid 3
-                                const tsidHingePointMapData = tsidHingePointMap.get(loc['location-id']);
-                                if (tsidHingePointMapData) {
-                                    reorderByAttribute(tsidHingePointMapData);
-                                    loc['tsid-hinge-point'] = tsidHingePointMapData;
-                                } else {
-                                    loc['tsid-hinge-point'] = null;
-                                }
+                                    // Append tsid 3
+                                    const tsidHingePointMapData = tsidHingePointMap.get(loc['location-id']);
+                                    if (tsidHingePointMapData) {
+                                        reorderByAttribute(tsidHingePointMapData);
+                                        loc['tsid-hinge-point'] = tsidHingePointMapData;
+                                    } else {
+                                        loc['tsid-hinge-point'] = null;
+                                    }
 
-                                // Append tsid 4
-                                const tsidTainterMapData = tsidTainterMap.get(loc['location-id']);
-                                if (tsidTainterMapData) {
-                                    reorderByAttribute(tsidTainterMapData);
-                                    loc['tsid-tainter'] = tsidTainterMapData;
-                                } else {
-                                    loc['tsid-tainter'] = null;
-                                }
+                                    // Append tsid 4
+                                    const tsidTainterMapData = tsidTainterMap.get(loc['location-id']);
+                                    if (tsidTainterMapData) {
+                                        reorderByAttribute(tsidTainterMapData);
+                                        loc['tsid-tainter'] = tsidTainterMapData;
+                                    } else {
+                                        loc['tsid-tainter'] = null;
+                                    }
 
-                                // Append tsid 5
-                                const tsidRollerMapData = tsidRollerMap.get(loc['location-id']);
-                                if (tsidRollerMapData) {
-                                    reorderByAttribute(tsidRollerMapData);
-                                    loc['tsid-roller'] = tsidRollerMapData;
-                                } else {
-                                    loc['tsid-roller'] = null;
-                                }
+                                    // Append tsid 5
+                                    const tsidRollerMapData = tsidRollerMap.get(loc['location-id']);
+                                    if (tsidRollerMapData) {
+                                        reorderByAttribute(tsidRollerMapData);
+                                        loc['tsid-roller'] = tsidRollerMapData;
+                                    } else {
+                                        loc['tsid-roller'] = null;
+                                    }
 
-                                // Initialize empty arrays to hold API and last-value data for various parameters
-                                loc['stage-api-data'] = [];
-                                loc['stage-cum-value'] = [];
-                                loc['stage-hourly-value'] = [];
-                                loc['stage-inc-value'] = [];
-                                loc['stage-last-value'] = [];
-                                loc['stage-max-value'] = [];
-                                loc['stage-min-value'] = [];
+                                    // Initialize empty arrays to hold API and last-value data for various parameters
+                                    loc['stage-api-data'] = [];
+                                    loc['stage-cum-value'] = [];
+                                    loc['stage-hourly-value'] = [];
+                                    loc['stage-inc-value'] = [];
+                                    loc['stage-last-value'] = [];
+                                    loc['stage-max-value'] = [];
+                                    loc['stage-min-value'] = [];
 
-                                loc['tw-api-data'] = [];
-                                loc['tw-cum-value'] = [];
-                                loc['tw-hourly-value'] = [];
-                                loc['tw-inc-value'] = [];
-                                loc['tw-last-value'] = [];
-                                loc['tw-max-value'] = [];
-                                loc['tw-min-value'] = [];
+                                    loc['tw-api-data'] = [];
+                                    loc['tw-cum-value'] = [];
+                                    loc['tw-hourly-value'] = [];
+                                    loc['tw-inc-value'] = [];
+                                    loc['tw-last-value'] = [];
+                                    loc['tw-max-value'] = [];
+                                    loc['tw-min-value'] = [];
 
-                                loc['hinge-point-api-data'] = [];
-                                loc['hinge-point-cum-value'] = [];
-                                loc['hinge-point-hourly-value'] = [];
-                                loc['hinge-point-inc-value'] = [];
-                                loc['hinge-point-last-value'] = [];
-                                loc['hinge-point-max-value'] = [];
-                                loc['hinge-point-min-value'] = [];
+                                    loc['hinge-point-api-data'] = [];
+                                    loc['hinge-point-cum-value'] = [];
+                                    loc['hinge-point-hourly-value'] = [];
+                                    loc['hinge-point-inc-value'] = [];
+                                    loc['hinge-point-last-value'] = [];
+                                    loc['hinge-point-max-value'] = [];
+                                    loc['hinge-point-min-value'] = [];
 
-                                loc['tainter-api-data'] = [];
-                                loc['tainter-cum-value'] = [];
-                                loc['tainter-hourly-value'] = [];
-                                loc['tainter-inc-value'] = [];
-                                loc['tainter-last-value'] = [];
-                                loc['tainter-max-value'] = [];
-                                loc['tainter-min-value'] = [];
+                                    loc['tainter-api-data'] = [];
+                                    loc['tainter-cum-value'] = [];
+                                    loc['tainter-hourly-value'] = [];
+                                    loc['tainter-inc-value'] = [];
+                                    loc['tainter-last-value'] = [];
+                                    loc['tainter-max-value'] = [];
+                                    loc['tainter-min-value'] = [];
 
-                                loc['roller-api-data'] = [];
-                                loc['roller-cum-value'] = [];
-                                loc['roller-hourly-value'] = [];
-                                loc['roller-inc-value'] = [];
-                                loc['roller-last-value'] = [];
-                                loc['roller-max-value'] = [];
-                                loc['roller-min-value'] = [];
+                                    loc['roller-api-data'] = [];
+                                    loc['roller-cum-value'] = [];
+                                    loc['roller-hourly-value'] = [];
+                                    loc['roller-inc-value'] = [];
+                                    loc['roller-last-value'] = [];
+                                    loc['roller-max-value'] = [];
+                                    loc['roller-min-value'] = [];
+                                })();
                             });
                         }
                     });
 
                     console.log('combinedData:', combinedData);
 
-                    // ***************************************************************************************************
-                    // ********************************** FILTER DATA ****************************************************
-                    // ***************************************************************************************************
+                    // Filter data
+                    (() => {
+                        // Step 1: Filter out locations where 'attribute' ends with '.1'
+                        combinedData.forEach((dataObj, index) => {
+                            // console.log(`Processing dataObj at index ${index}:`, dataObj['assigned-locations']);
 
-                    // Step 1: Filter out locations where 'attribute' ends with '.1'
-                    combinedData.forEach((dataObj, index) => {
-                        // console.log(`Processing dataObj at index ${index}:`, dataObj['assigned-locations']);
-
-                        // Filter out locations with 'attribute' ending in '.1'
-                        dataObj['assigned-locations'] = dataObj['assigned-locations'].filter(location => {
-                            const attribute = location['attribute'].toString();
-                            if (attribute.endsWith('.1')) {
-                                // Log the location being removed
-                                // console.log(`Removing location with attribute '${attribute}' and id '${location['location-id']}' at index ${index}`);
-                                return false; // Filter out this location
-                            }
-                            return true; // Keep the location
-                        });
-
-                        // console.log(`Updated assigned-locations for index ${index}:`, dataObj['assigned-locations']);
-                    });
-
-                    console.log('Filtered all locations ending with .1 successfully:', combinedData);
-
-                    // Step 2: Filter out locations where 'location-id' doesn't match owner's 'assigned-locations'
-                    combinedData.forEach(dataGroup => {
-                        // Iterate over each assigned-location in the dataGroup
-                        let locations = dataGroup['assigned-locations'];
-
-                        // Loop through the locations array in reverse to safely remove items
-                        for (let i = locations.length - 1; i >= 0; i--) {
-                            let location = locations[i];
-
-                            // Find if the current location-id exists in owner's assigned-locations
-                            let matchingOwnerLocation = location['owner']['assigned-locations'].some(ownerLoc => {
-                                return ownerLoc['location-id'] === location['location-id'];
+                            // Filter out locations with 'attribute' ending in '.1'
+                            dataObj['assigned-locations'] = dataObj['assigned-locations'].filter(location => {
+                                const attribute = location['attribute'].toString();
+                                if (attribute.endsWith('.1')) {
+                                    // Log the location being removed
+                                    // console.log(`Removing location with attribute '${attribute}' and id '${location['location-id']}' at index ${index}`);
+                                    return false; // Filter out this location
+                                }
+                                return true; // Keep the location
                             });
 
-                            // If no match, remove the location
-                            if (!matchingOwnerLocation) {
-                                // console.log(`Removing location with id ${location['location-id']} as it does not match owner`);
-                                locations.splice(i, 1);
+                            // console.log(`Updated assigned-locations for index ${index}:`, dataObj['assigned-locations']);
+                        });
+
+                        console.log('Filtered all locations ending with .1 successfully:', combinedData);
+
+                        // Step 2: Filter out locations where 'location-id' doesn't match owner's 'assigned-locations'
+                        combinedData.forEach(dataGroup => {
+                            // Iterate over each assigned-location in the dataGroup
+                            let locations = dataGroup['assigned-locations'];
+
+                            // Loop through the locations array in reverse to safely remove items
+                            for (let i = locations.length - 1; i >= 0; i--) {
+                                let location = locations[i];
+
+                                // Find if the current location-id exists in owner's assigned-locations
+                                let matchingOwnerLocation = location['owner']['assigned-locations'].some(ownerLoc => {
+                                    return ownerLoc['location-id'] === location['location-id'];
+                                });
+
+                                // If no match, remove the location
+                                if (!matchingOwnerLocation) {
+                                    // console.log(`Removing location with id ${location['location-id']} as it does not match owner`);
+                                    locations.splice(i, 1);
+                                }
                             }
-                        }
-                    });
+                        });
 
-                    console.log('Filtered all locations by matching location-id with owner successfully:', combinedData);
+                        console.log('Filtered all locations by matching location-id with owner successfully:', combinedData);
 
-                    // Step 3: Filter out locations where 'tsid-stage' is null
-                    combinedData.forEach(dataGroup => {
-                        // Iterate over each assigned-location in the dataGroup
-                        let locations = dataGroup['assigned-locations'];
+                        // Step 3: Filter out locations where 'tsid-stage' is null
+                        combinedData.forEach(dataGroup => {
+                            // Iterate over each assigned-location in the dataGroup
+                            let locations = dataGroup['assigned-locations'];
 
-                        // Loop through the locations array in reverse to safely remove items
-                        for (let i = locations.length - 1; i >= 0; i--) {
-                            let location = locations[i];
+                            // Loop through the locations array in reverse to safely remove items
+                            for (let i = locations.length - 1; i >= 0; i--) {
+                                let location = locations[i];
 
-                            // console.log("tsid-stage: ", location[`tsid-stage`]);
+                                // console.log("tsid-stage: ", location[`tsid-stage`]);
 
-                            // Check if 'tsid-stage' is null or undefined
-                            let isLocationNull = location[`tsid-stage`] == null;
+                                // Check if 'tsid-stage' is null or undefined
+                                let isLocationNull = location[`tsid-stage`] == null;
 
-                            // If tsid-stage is null, remove the location
-                            if (isLocationNull) {
-                                console.log(`Removing location with id ${location['location-id']}`);
-                                locations.splice(i, 1); // Remove the location from the array
+                                // If tsid-stage is null, remove the location
+                                if (isLocationNull) {
+                                    console.log(`Removing location with id ${location['location-id']}`);
+                                    locations.splice(i, 1); // Remove the location from the array
+                                }
                             }
-                        }
-                    });
+                        });
 
-                    console.log('Filtered all locations where tsid is null successfully:', combinedData);
+                        console.log('Filtered all locations where tsid is null successfully:', combinedData);
 
-                    // Step 4: Filter out basin where there are no gages
-                    combinedData = combinedData.filter(item => item['assigned-locations'] && item['assigned-locations'].length > 0);
+                        // Step 4: Filter out basin where there are no gages
+                        combinedData = combinedData.filter(item => item['assigned-locations'] && item['assigned-locations'].length > 0);
 
-                    console.log('Filtered all basin where assigned-locations is null successfully:', combinedData);
+                        console.log('Filtered all basin where assigned-locations is null successfully:', combinedData);
 
-                    // Step 5: Filter out basin order
-                    const sortOrderBasin = ['Mississippi', 'Kaskaskia'];
+                        // Step 5: Filter out basin order
+                        const sortOrderBasin = ['Mississippi', 'Kaskaskia'];
 
-                    // Sort the combinedData array based on the sortOrderBasin
-                    combinedData.sort((a, b) => {
-                        const indexA = sortOrderBasin.indexOf(a.id); // Assuming 'id' represents the basin name
-                        const indexB = sortOrderBasin.indexOf(b.id); // Assuming 'id' represents the basin name
+                        // Sort the combinedData array based on the sortOrderBasin
+                        combinedData.sort((a, b) => {
+                            const indexA = sortOrderBasin.indexOf(a.id); // Assuming 'id' represents the basin name
+                            const indexB = sortOrderBasin.indexOf(b.id); // Assuming 'id' represents the basin name
 
-                        // If both basins are found in the sortOrderBasin, sort based on their indices
-                        if (indexA !== -1 && indexB !== -1) {
-                            return indexA - indexB; // Sort based on order in sortOrderBasin
-                        }
-                        // If one is not found, put it at the end
-                        return indexA === -1 ? 1 : -1;
-                    });
+                            // If both basins are found in the sortOrderBasin, sort based on their indices
+                            if (indexA !== -1 && indexB !== -1) {
+                                return indexA - indexB; // Sort based on order in sortOrderBasin
+                            }
+                            // If one is not found, put it at the end
+                            return indexA === -1 ? 1 : -1;
+                        });
 
-                    // Log the sorted combinedData for verification
-                    console.log("Sorted combinedData: ", combinedData);
-
-
+                        // Log the sorted combinedData for verification
+                        console.log("Sorted combinedData: ", combinedData);
+                    })();
 
                     const timeSeriesDataPromises = [];
 
@@ -816,16 +817,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                     return Promise.all(timeSeriesDataPromises);
                 })
                 .then(() => {
-                    // Assuming this is inside a promise chain (like in a `.then()`)
-
                     console.log('All combinedData data fetched successfully:', combinedData);
 
-
-
-                    // ***************************************************************************************************
-                    // ********************************** CREATE TABLE ***************************************************
-                    // ***************************************************************************************************
-                    // Only call createTable if no valid data exists
                     const table = createTableLdGateSummary(combinedData, type, reportNumber);
 
                     // Append the table to the specified container
@@ -838,7 +831,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                     console.error('There was a problem with one or more fetch operations:', error);
                     loadingIndicator.style.display = 'none';
                 });
-
         })
         .catch(error => {
             console.error('There was a problem with the initial fetch operation:', error);
