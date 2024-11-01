@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     let setTimeseriesGroup4 = null;
     let setTimeseriesGroup5 = null;
     let setLookBackHours = null;
-    let reportDiv = null;
+    let setReportDiv = null;
 
     let reportNumber = 1;
 
@@ -19,8 +19,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log("********************* Setup LD Gate Summary *******************");
         console.log("***************************************************************");
         // Set the category and base URL for API calls
-        reportDiv = "ld_gate_summary";
-        setLocationCategory = "Basins";
+        setReportDiv = "ld_gate_summary";
+        setLocationCategory = "Projects";
         setLocationGroupOwner = "Ld-Gate-Summary";
         setTimeseriesGroup1 = "Stage";
         setTimeseriesGroup2 = "Stage-TW";
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // Display the loading indicator for water quality alarm
-    const loadingIndicator = document.getElementById(`loading_${reportDiv}`);
+    const loadingIndicator = document.getElementById(`loading_${setReportDiv}`);
     loadingIndicator.style.display = 'block'; // Show the loading indicator
 
     console.log("setLocationCategory: ", setLocationCategory);
@@ -471,7 +471,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     loc['owner'] = ownerMapData;
                                 }
 
-                                // Append tsid
+                                // Append tsid 1
                                 const tsidStageMapData = tsidStageMap.get(loc['location-id']);
                                 if (tsidStageMapData) {
                                     reorderByAttribute(tsidStageMapData);
@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                             const attribute = location['attribute'].toString();
                             if (attribute.endsWith('.1')) {
                                 // Log the location being removed
-                                console.log(`Removing location with attribute '${attribute}' and id '${location['location-id']}' at index ${index}`);
+                                // console.log(`Removing location with attribute '${attribute}' and id '${location['location-id']}' at index ${index}`);
                                 return false; // Filter out this location
                             }
                             return true; // Keep the location
@@ -602,7 +602,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                             // If no match, remove the location
                             if (!matchingOwnerLocation) {
-                                console.log(`Removing location with id ${location['location-id']} as it does not match owner`);
+                                // console.log(`Removing location with id ${location['location-id']} as it does not match owner`);
                                 locations.splice(i, 1);
                             }
                         }
@@ -813,7 +813,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     //         const table = createTableDataSpike(combinedData);
 
                     //         // Append the table to the specified container
-                    //         const container = document.getElementById(`table_container_alarm_${reportDiv}`);
+                    //         const container = document.getElementById(`table_container_alarm_${setReportDiv}`);
                     //         container.appendChild(table);
                     //     } else {
                     //         console.log("combinedData has all valid data and no data spikes detected. Displaying image instead.");
@@ -826,7 +826,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     //         img.style.height = '50px'; // Optional: set the image height
 
                     //         // Get the container and append the image
-                    //         const container = document.getElementById(`table_container_alarm_${reportDiv}`);
+                    //         const container = document.getElementById(`table_container_alarm_${setReportDiv}`);
                     //         container.appendChild(img);
                     //     }
                     // } else {
@@ -836,7 +836,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     //     const table = createTable(combinedData, type, reportNumber);
 
                     //     // Append the table to the specified container
-                    //     const container = document.getElementById(`table_container_alarm_${reportDiv}`);
+                    //     const container = document.getElementById(`table_container_alarm_${setReportDiv}`);
                     //     container.appendChild(table);
                     // }
 
@@ -845,7 +845,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     // const table = createTablePrecip(combinedData, type, reportNumber);
 
                     // // Append the table to the specified container
-                    // const container = document.getElementById(`table_container_${reportDiv}`);
+                    // const container = document.getElementById(`table_container_${setReportDiv}`);
                     // container.appendChild(table);
 
                     loadingIndicator.style.display = 'none';
@@ -1191,114 +1191,40 @@ function getIncValue(data, tsid) {
                 value0 = { tsid, timestamp, value, qualityCode };
             } else {
                 // Calculate target timestamps for each interval
-                const sixHoursEarlier = new Date(value0.timestamp);
-                sixHoursEarlier.setHours(sixHoursEarlier.getHours() - 6);
-
-                const twelveHoursEarlier = new Date(value0.timestamp);
-                twelveHoursEarlier.setHours(twelveHoursEarlier.getHours() - 12);
-
-                const eighteenHoursEarlier = new Date(value0.timestamp);
-                eighteenHoursEarlier.setHours(eighteenHoursEarlier.getHours() - 18);
-
-                const twentyFourHoursEarlier = new Date(value0.timestamp);
-                twentyFourHoursEarlier.setHours(twentyFourHoursEarlier.getHours() - 24);
-
-                const thirtyHoursEarlier = new Date(value0.timestamp);
-                thirtyHoursEarlier.setHours(thirtyHoursEarlier.getHours() - 30);
-
-                const thirtySixHoursEarlier = new Date(value0.timestamp);
-                thirtySixHoursEarlier.setHours(thirtySixHoursEarlier.getHours() - 36);
-
-                const fortyTwoHoursEarlier = new Date(value0.timestamp);
-                fortyTwoHoursEarlier.setHours(fortyTwoHoursEarlier.getHours() - 42);
-
-                const fortyEightHoursEarlier = new Date(value0.timestamp);
-                fortyEightHoursEarlier.setHours(fortyEightHoursEarlier.getHours() - 48);
-
-                const fiftyFourHoursEarlier = new Date(value0.timestamp);
-                fiftyFourHoursEarlier.setHours(fiftyFourHoursEarlier.getHours() - 54);
-
-                const sixtyHoursEarlier = new Date(value0.timestamp);
-                sixtyHoursEarlier.setHours(sixtyHoursEarlier.getHours() - 60);
-
-                const sixtySixHoursEarlier = new Date(value0.timestamp);
-                sixtySixHoursEarlier.setHours(sixtySixHoursEarlier.getHours() - 66);
-
-                const seventyTwoHoursEarlier = new Date(value0.timestamp);
-                seventyTwoHoursEarlier.setHours(seventyTwoHoursEarlier.getHours() - 72);
-
-                // Assign values if the timestamps match
-                if (!value6 && currentTimestamp.getTime() === sixHoursEarlier.getTime()) {
-                    value6 = { tsid, timestamp, value, qualityCode };
-                } else if (!value12 && currentTimestamp.getTime() === twelveHoursEarlier.getTime()) {
-                    value12 = { tsid, timestamp, value, qualityCode };
-                } else if (!value18 && currentTimestamp.getTime() === eighteenHoursEarlier.getTime()) {
-                    value18 = { tsid, timestamp, value, qualityCode };
-                } else if (!value24 && currentTimestamp.getTime() === twentyFourHoursEarlier.getTime()) {
-                    value24 = { tsid, timestamp, value, qualityCode };
-                } else if (!value30 && currentTimestamp.getTime() === thirtyHoursEarlier.getTime()) {
-                    value30 = { tsid, timestamp, value, qualityCode };
-                } else if (!value36 && currentTimestamp.getTime() === thirtySixHoursEarlier.getTime()) {
-                    value36 = { tsid, timestamp, value, qualityCode };
-                } else if (!value42 && currentTimestamp.getTime() === fortyTwoHoursEarlier.getTime()) {
-                    value42 = { tsid, timestamp, value, qualityCode };
-                } else if (!value48 && currentTimestamp.getTime() === fortyEightHoursEarlier.getTime()) {
-                    value48 = { tsid, timestamp, value, qualityCode };
-                } else if (!value54 && currentTimestamp.getTime() === fiftyFourHoursEarlier.getTime()) {
-                    value54 = { tsid, timestamp, value, qualityCode };
-                } else if (!value60 && currentTimestamp.getTime() === sixtyHoursEarlier.getTime()) {
-                    value60 = { tsid, timestamp, value, qualityCode };
-                } else if (!value66 && currentTimestamp.getTime() === sixtySixHoursEarlier.getTime()) {
-                    value66 = { tsid, timestamp, value, qualityCode };
-                } else if (!value72 && currentTimestamp.getTime() === seventyTwoHoursEarlier.getTime()) {
-                    value72 = { tsid, timestamp, value, qualityCode };
-                }
+                const intervals = [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72];
+                const valuesMap = [value6, value12, value18, value24, value30, value36, value42, value48, value54, value60, value66, value72];
+                
+                intervals.forEach((interval, idx) => {
+                    const targetTime = new Date(value0.timestamp);
+                    targetTime.setHours(targetTime.getHours() - interval);
+                    if (!valuesMap[idx] && currentTimestamp.getTime() === targetTime.getTime()) {
+                        valuesMap[idx] = { tsid, timestamp, value, qualityCode };
+                    }
+                });
 
                 // Break loop if all values are found
-                if (
-                    value6 &&
-                    value12 &&
-                    value18 &&
-                    value24 &&
-                    value30 &&
-                    value36 &&
-                    value42 &&
-                    value48 &&
-                    value54 &&
-                    value60 &&
-                    value66 &&
-                    value72
-                ) {
+                if (valuesMap.every(val => val !== null)) {
                     break;
                 }
             }
         }
     }
 
-    // Calculate incremental values (valueX - valuePrevious)
+    // Calculate incremental values (valueX - valuePrevious) if both values are not null
     const incrementalValues = {
-        incremental6: value6 ? value0.value - value6.value : null,
-        incremental12: value12 ? value6.value - value12.value : null,
-        incremental18: value18 ? value12.value - value18.value : null,
-        incremental24: value24 ? value18.value - value24.value : null,
-        incremental30: value30 ? value24.value - value30.value : null,
-        incremental36: value36 ? value30.value - value36.value : null,
-        incremental42: value42 ? value36.value - value42.value : null,
-        incremental48: value48 ? value42.value - value48.value : null,
-        incremental54: value54 ? value48.value - value54.value : null,
-        incremental60: value60 ? value54.value - value60.value : null,
-        incremental66: value66 ? value60.value - value66.value : null,
-        incremental72: value72 ? value66.value - value72.value : null,
+        incremental6: value6 && value0 ? value0.value - value6.value : null,
+        incremental12: value12 && value6 ? value6.value - value12.value : null,
+        incremental18: value18 && value12 ? value12.value - value18.value : null,
+        incremental24: value24 && value18 ? value18.value - value24.value : null,
+        incremental30: value30 && value24 ? value24.value - value30.value : null,
+        incremental36: value36 && value30 ? value30.value - value36.value : null,
+        incremental42: value42 && value36 ? value36.value - value42.value : null,
+        incremental48: value48 && value42 ? value42.value - value48.value : null,
+        incremental54: value54 && value48 ? value48.value - value54.value : null,
+        incremental60: value60 && value54 ? value54.value - value60.value : null,
+        incremental66: value66 && value60 ? value60.value - value66.value : null,
+        incremental72: value72 && value66 ? value66.value - value72.value : null,
     };
-
-    // Calculate cumulative values (value0 - valueX)
-    // const cumulativeValues = {
-    //     cumulative6: value0 && value6 ? value0.value - value6.value : null,
-    //     cumulative12: value0 && value12 ? value0.value - value12.value : null,
-    //     cumulative24: value0 && value24 ? value0.value - value24.value : null,
-    //     cumulative48: value0 && value48 ? value0.value - value48.value : null,
-    //     cumulative72: value0 && value72 ? value0.value - value72.value : null,
-    // };
 
     return {
         value0,
@@ -1314,8 +1240,7 @@ function getIncValue(data, tsid) {
         value60,
         value66,
         value72,
-        ...incrementalValues, // Spread operator to include incremental values in the return object
-        // ...cumulativeValues // Spread operator to include cumulative values in the return object
+        ...incrementalValues
     };
 }
 
@@ -1564,11 +1489,11 @@ function createTablePrecip(combinedData, type, reportNumber) {
 function updateLocData(locData, type, data, lastValue, maxValue, minValue, cumValue, incValue, hourlyValue) {
     const keys = {
         apiDataKey: `${type}-api-data`,
-        // lastValueKey: `${type}-last-value`,
-        // maxValueKey: `${type}-max-value`,
-        // minValueKey: `${type}-min-value`,
-        // cumValueKey: `${type}-cum-value`,
-        // incValueKey: `${type}-inc-value`,
+        lastValueKey: `${type}-last-value`,
+        maxValueKey: `${type}-max-value`,
+        minValueKey: `${type}-min-value`,
+        cumValueKey: `${type}-cum-value`,
+        incValueKey: `${type}-inc-value`,
         hourlyValueKey: `${type}-hourly-value`
     };
 
