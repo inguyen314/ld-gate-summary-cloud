@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         setTimeseriesGroup3 = "Hinge-Point";
         setTimeseriesGroup4 = "Tainter";
         setTimeseriesGroup5 = "Roller";
-        setLookBackHours = subtractDaysFromDate(new Date(), 2);
+        setLookBackHours = subtractDaysFromDate(new Date(), 1);
     }
 
     // Display the loading indicator for water quality alarm
@@ -647,7 +647,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                             // Handle temperature, depth, and DO time series
                             const stageTimeSeries = locData['tsid-stage']?.['assigned-time-series'] || [];
                             const twTimeSeries = locData['tsid-tw']?.['assigned-time-series'] || [];
-                            const hingePointTimeSeries = locData['tsid-tw']?.['assigned-time-series'] || [];
+                            const hingePointTimeSeries = locData['tsid-hinge-point']?.['assigned-time-series'] || [];
                             const tainterTimeSeries = locData['tsid-tainter']?.['assigned-time-series'] || [];
                             const rollerTimeSeries = locData['tsid-roller']?.['assigned-time-series'] || [];
 
@@ -799,54 +799,17 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                     console.log('All combinedData data fetched successfully:', combinedData);
 
-                    
+
 
                     // ***************************************************************************************************
                     // ********************************** CREATE TABLE ***************************************************
                     // ***************************************************************************************************
-                    // Check if there are valid lastDatmanValues in the data
-                    // if (hasLastValue(combinedData)) {
-                    //     console.log("combinedData has all valid data.");
-                    //     if (hasDataSpike(combinedData)) {
-                    //         console.log("combinedData has all valid data, but data spike detected. Calling createTableDataSpike.");
-                    //         // call createTable if data spike exists
-                    //         const table = createTableDataSpike(combinedData);
-
-                    //         // Append the table to the specified container
-                    //         const container = document.getElementById(`table_container_alarm_${setReportDiv}`);
-                    //         container.appendChild(table);
-                    //     } else {
-                    //         console.log("combinedData has all valid data and no data spikes detected. Displaying image instead.");
-
-                    //         // Create an img element
-                    //         const img = document.createElement('img');
-                    //         img.src = '/apps/alarms/images/passed.png'; // Set the image source
-                    //         img.alt = 'Process Completed'; // Optional alt text for accessibility
-                    //         img.style.width = '50px'; // Optional: set the image width
-                    //         img.style.height = '50px'; // Optional: set the image height
-
-                    //         // Get the container and append the image
-                    //         const container = document.getElementById(`table_container_alarm_${setReportDiv}`);
-                    //         container.appendChild(img);
-                    //     }
-                    // } else {
-                    //     console.log("combinedData does not have all valid data. Calling createTable");
-
-                    //     // Only call createTable if no valid data exists
-                    //     const table = createTable(combinedData, type, reportNumber);
-
-                    //     // Append the table to the specified container
-                    //     const container = document.getElementById(`table_container_alarm_${setReportDiv}`);
-                    //     container.appendChild(table);
-                    // }
-
-
                     // Only call createTable if no valid data exists
-                    // const table = createTablePrecip(combinedData, type, reportNumber);
+                    const table = createTableLdGateSummary(combinedData, type, reportNumber);
 
-                    // // Append the table to the specified container
-                    // const container = document.getElementById(`table_container_${setReportDiv}`);
-                    // container.appendChild(table);
+                    // Append the table to the specified container
+                    const container = document.getElementById(`table_container_${setReportDiv}`);
+                    container.appendChild(table);
 
                     loadingIndicator.style.display = 'none';
                 })
@@ -1193,7 +1156,7 @@ function getIncValue(data, tsid) {
                 // Calculate target timestamps for each interval
                 const intervals = [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72];
                 const valuesMap = [value6, value12, value18, value24, value30, value36, value42, value48, value54, value60, value66, value72];
-                
+
                 intervals.forEach((interval, idx) => {
                     const targetTime = new Date(value0.timestamp);
                     targetTime.setHours(targetTime.getHours() - interval);
@@ -1484,6 +1447,75 @@ function createTablePrecip(combinedData, type, reportNumber) {
     });
 
     return table;
+}
+
+function createTableLdGateSummary(combinedData, type, reportNumber) {
+    // Create a new table element and set its ID
+    const table = document.createElement('table');
+    table.setAttribute('id', 'gage_data');
+
+    // Loop through each basin in the combined data
+    combinedData.forEach((basin) => {
+        // Loop through each assigned location in the basin
+        basin['assigned-locations'].forEach((location) => {
+            console.log("location-id: ", location['location-id']);
+
+            // Create a row for the location ID spanning 6 columns
+            const locationRow = document.createElement('tr');
+            const locationCell = document.createElement('th');
+            locationCell.colSpan = 6; // Set colspan to 6 for location ID
+            locationCell.textContent = location['location-id'];
+            locationCell.style.height = '50px'; // Set the height of the locationCell
+            locationRow.appendChild(locationCell);
+            table.appendChild(locationRow); // Append the location row to the table
+
+            // Create a header row for the data columns
+            const headerRow = document.createElement('tr');
+            const columns = ["Date Time", "Pool", "Tail Water", "Hinge Point", "Tainter", "Roller"];
+            columns.forEach((columnName) => {
+                const th = document.createElement('th');
+                th.textContent = columnName; // Set the header text
+                th.style.height = '40px'; // Set the height of the header
+                th.style.backgroundColor = 'darkblue'; // Set background color
+                th.style.color = 'white'; // Set text color
+                headerRow.appendChild(th); // Append header cells to the header row
+            });
+            table.appendChild(headerRow); // Append the header row to the table
+
+            // Loop through stage-hourly-value and other values to add data rows
+            location['stage-hourly-value'][0].forEach((entry, index) => {
+                const row = document.createElement('tr'); // Create a new row for each entry
+
+                // Fetch values based on index; fallback to "N/A" if not available
+                const dateTime = entry?.timestamp || "N/A";
+                const poolValue = location['stage-hourly-value']?.[0][index]?.value?.toFixed(2) || "N/A";
+                const tailWaterValue = location['tw-hourly-value']?.[0]?.[index]?.value?.toFixed(2) || "N/A";
+                const hingePointValue = location['hinge-point-hourly-value']?.[0]?.[index]?.value?.toFixed(2) || "N/A";
+                const tainterValue = location['tainter-hourly-value']?.[0]?.[index]?.value?.toFixed(2) || "N/A";
+                const rollerValue = location['roller-hourly-value']?.[0]?.[index]?.value?.toFixed(2) || "N/A";
+
+                // Create and append cells to the row for each value
+                [dateTime, poolValue, tailWaterValue, hingePointValue, tainterValue, rollerValue].forEach((value) => {
+                    const cell = document.createElement('td'); // Create a new cell for each value
+                    cell.textContent = value; // Set the cell text
+                    row.appendChild(cell); // Append the cell to the row
+                });
+
+                // Append the data row to the table
+                table.appendChild(row);
+            });
+
+            // Add a spacer row after each location's data rows for visual separation
+            const spacerRow = document.createElement('tr'); // Create a new row for spacing
+            const spacerCell = document.createElement('td'); // Create a cell for the spacer
+            spacerCell.colSpan = 6; // Set colspan to 6 for the spacer cell
+            spacerCell.style.height = '20px'; // Set height for the spacer
+            spacerRow.appendChild(spacerCell); // Append the spacer cell to the spacer row
+            table.appendChild(spacerRow); // Append the spacer row to the table
+        });
+    });
+
+    return table; // Return the completed table
 }
 
 function updateLocData(locData, type, data, lastValue, maxValue, minValue, cumValue, incValue, hourlyValue) {
