@@ -1,26 +1,3 @@
-<script>
-    // Create a URL object with the current page URL
-    const urlParams = new URLSearchParams(window.location.search);
-
-    urlParams.forEach(function (value, key) {
-        console.log(key, value);
-    });
-
-    var selectedBasin = urlParams.get('basin');
-    console.log('selectedBasin: ', selectedBasin);
-
-    var basin = urlParams.get('basin');
-    console.log('basin: ', basin);
-
-    var type = urlParams.get('type');
-    console.log('type: ', type);
-
-    var cda = urlParams.get('cda');
-    console.log('cda: ', cda);
-
-    var office = urlParams.get('office');
-    console.log('office: ', office);
-</script>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -71,6 +48,32 @@
                     </div>
                 </div>
                 <!-- Start Div -->
+                <script>
+                    // Create a URL object with the current page URL
+                    const urlParams = new URLSearchParams(window.location.search);
+
+                    // Calculate the document root
+                    const documentRoot = window.location.protocol + "//" + window.location.host + "/";
+
+                    // Determine the default value of cda based on documentRoot
+                    const cdaDefault = (documentRoot === `https://wm.${office}.ds.usace.army.mil/`) ? "internal" : "public";
+                    console.log("cdaDefault: ", cdaDefault);
+
+                    var selectedBasin = urlParams.get('basin');
+                    console.log('selectedBasin: ', selectedBasin);
+
+                    var basin = urlParams.get('basin');
+                    console.log('basin: ', basin);
+
+                    var type = urlParams.get('type');
+                    console.log('type: ', type);
+
+                    var cda = urlParams.get('cda') || cdaDefault;
+                    console.log('cda: ', cda);
+
+                    var office = urlParams.get('office') || "MVS";
+                    console.log('office: ', office);
+                </script>
                 <div id="loading_ld_gate_summary" style="display: none;"><img src="images/loading4.gif"
                         style='height: 50px; width: 50px;' alt="Loading..." /></div>
                 <div id="table_container_ld_gate_summary"></div>
