@@ -1510,41 +1510,48 @@ function createTableLdGateSummary(combinedData, type, reportNumber) {
             });
             table.appendChild(headerRow); // Append the header row to the table
 
-            // Loop through stage-hourly-value and other values to add data rows
-            location['stage-hourly-value'][0].forEach((entry, index) => {
+            // Sort stage-hourly-value array by timestamp in descending order
+            const sortedEntries = location['stage-hourly-value'][0].slice().sort((a, b) => {
+                const dateA = new Date(a.timestamp);
+                const dateB = new Date(b.timestamp);
+                return dateB - dateA; // Descending order
+            });
+
+            // Loop through sorted stage-hourly-value to add data rows
+            sortedEntries.forEach((entry) => {
                 const row = document.createElement('tr'); // Create a new row for each entry
-            
+
                 // Fetch the dateTime for the current entry
                 const dateTime = entry?.timestamp || "N/A";
-                
+
                 // Check if the current timestamp matches any poolValue timestamp
                 const poolValueEntry = location['stage-hourly-value'][0].find(poolValue => poolValue.timestamp === dateTime);
                 const poolValue = poolValueEntry ? poolValueEntry.value.toFixed(2) : "--"; // Use "--" if no match
-            
+
                 // Match timestamps and grab values for tailWaterValue, hingePointValue, tainterValue, and rollerValue
                 const tailWaterEntry = location['tw-hourly-value']?.[0]?.find(tailWater => tailWater.timestamp === dateTime);
                 const tailWaterValue = tailWaterEntry ? tailWaterEntry.value.toFixed(2) : "--"; // Use "--" if no match
-            
+
                 const hingePointEntry = location['hinge-point-hourly-value']?.[0]?.find(hingePoint => hingePoint.timestamp === dateTime);
                 const hingePointValue = hingePointEntry ? hingePointEntry.value.toFixed(2) : "--"; // Use "--" if no match
-            
+
                 const tainterEntry = location['tainter-hourly-value']?.[0]?.find(tainter => tainter.timestamp === dateTime);
                 const tainterValue = tainterEntry ? tainterEntry.value.toFixed(2) : "--"; // Use "--" if no match
-            
+
                 const rollerEntry = location['roller-hourly-value']?.[0]?.find(roller => roller.timestamp === dateTime);
                 const rollerValue = rollerEntry ? rollerEntry.value.toFixed(2) : "--"; // Use "--" if no match
-            
+
                 // Create and append cells to the row for each value
                 [dateTime, poolValue, tailWaterValue, hingePointValue, tainterValue, rollerValue].forEach((value) => {
                     const cell = document.createElement('td'); // Create a new cell for each value
                     cell.textContent = value; // Set the cell text
                     row.appendChild(cell); // Append the cell to the row
                 });
-            
+
                 // Append the data row to the table
                 table.appendChild(row);
             });
-            
+
             // Add a spacer row after each location's data rows for visual separation
             const spacerRow = document.createElement('tr'); // Create a new row for spacing
             const spacerCell = document.createElement('td'); // Create a cell for the spacer
