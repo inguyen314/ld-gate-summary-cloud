@@ -12,23 +12,17 @@ document.addEventListener('DOMContentLoaded', async function () {
     let setLookBackHours = null;
     let setReportDiv = null;
 
-    let reportNumber = 1;
-
-    if (reportNumber === 1) {
-        console.log("***************************************************************");
-        console.log("********************* Setup LD Gate Summary *******************");
-        console.log("***************************************************************");
-        // Set the category and base URL for API calls
-        setReportDiv = "ld_gate_summary";
-        setLocationCategory = "Projects";
-        setLocationGroupOwner = "Ld-Gate-Summary";
-        setTimeseriesGroup1 = "Stage";
-        setTimeseriesGroup2 = "Stage-TW";
-        setTimeseriesGroup3 = "Hinge-Point";
-        setTimeseriesGroup4 = "Tainter";
-        setTimeseriesGroup5 = "Roller";
-        setLookBackHours = subtractDaysFromDate(new Date(), 1);
-    }
+    console.log("********************* ld_gate_summary *******************");
+    // Set the category and base URL for API calls
+    setReportDiv = "ld_gate_summary";
+    setLocationCategory = "Projects";
+    setLocationGroupOwner = "Ld-Gate-Summary";
+    setTimeseriesGroup1 = "Stage";
+    setTimeseriesGroup2 = "Stage-TW";
+    setTimeseriesGroup3 = "Hinge-Point";
+    setTimeseriesGroup4 = "Tainter";
+    setTimeseriesGroup5 = "Roller";
+    setLookBackHours = subtractDaysFromDate(new Date(), 1);
 
     // Display the loading indicator for water quality alarm
     const loadingIndicator = document.getElementById(`loading_${setReportDiv}`);
@@ -445,6 +439,11 @@ document.addEventListener('DOMContentLoaded', async function () {
                     combinedData.forEach(basinData => {
                         if (basinData['assigned-locations']) {
                             basinData['assigned-locations'].forEach(loc => {
+
+                                const reorderByAttribute = (data) => {
+                                    data['assigned-time-series'].sort((a, b) => a.attribute - b.attribute);
+                                };
+
                                 // Append metadata and tsid
                                 (() => {
                                     // // Append metadata
@@ -819,7 +818,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 .then(() => {
                     console.log('All combinedData data fetched successfully:', combinedData);
 
-                    const table = createTableLdGateSummary(combinedData, type, reportNumber);
+                    const table = createTableLdGateSummary(combinedData, type);
 
                     // Append the table to the specified container
                     const container = document.getElementById(`table_container_${setReportDiv}`);
@@ -863,54 +862,6 @@ function formatISODate2ReadableDate(timestamp) {
     const min = String(date.getMinutes()).padStart(2, '0'); // Minutes
     return `${mm}-${dd}-${yyyy} ${hh}:${min}`;
 }
-
-const reorderByAttribute = (data) => {
-    data['assigned-time-series'].sort((a, b) => a.attribute - b.attribute);
-};
-
-const formatTime = (date) => {
-    const pad = (num) => (num < 10 ? '0' + num : num);
-    return `${pad(date.getMonth() + 1)}-${pad(date.getDate())}-${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-};
-
-const findValuesAtTimes = (data) => {
-    const result = [];
-    const currentDate = new Date();
-
-    // Create time options for 5 AM, 6 AM, and 7 AM today in Central Standard Time
-    const timesToCheck = [
-        new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 6, 0), // 6 AM CST
-        new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 5, 0), // 5 AM CST
-        new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 7, 0)  // 7 AM CST
-    ];
-
-    const foundValues = [];
-
-    // Iterate over the values in the provided data
-    const values = data.values;
-
-    // Check for each time in the order of preference
-    timesToCheck.forEach((time) => {
-        // Format the date-time to match the format in the data
-        const formattedTime = formatTime(time);
-        // console.log(formattedTime);
-
-        const entry = values.find(v => v[0] === formattedTime);
-        if (entry) {
-            foundValues.push({ time: formattedTime, value: entry[1] }); // Store both time and value if found
-        } else {
-            foundValues.push({ time: formattedTime, value: null }); // Store null if not found
-        }
-    });
-
-    // Push the result for this data entry
-    result.push({
-        name: data.name,
-        values: foundValues // This will contain the array of { time, value } objects
-    });
-
-    return result;
-};
 
 function getLastNonNullValue(data, tsid) {
     // Iterate over the values array in reverse
@@ -1338,7 +1289,7 @@ function hasLastValue(data) {
     }
 }
 
-function createTablePrecip(combinedData, type, reportNumber) {
+function createTablePrecip(combinedData, type) {
     const table = document.createElement('table');
     table.setAttribute('id', 'gage_data');
 
@@ -1477,7 +1428,7 @@ function createTablePrecip(combinedData, type, reportNumber) {
     return table;
 }
 
-function createTableLdGateSummary(combinedData, type, reportNumber) {
+function createTableLdGateSummary(combinedData, type) {
     // Create a new table element and set its ID
     const table = document.createElement('table');
     table.setAttribute('id', 'gage_data');

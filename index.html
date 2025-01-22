@@ -59,13 +59,13 @@
                     const cdaDefault = (documentRoot === `https://wm.${office}.ds.usace.army.mil/`) ? "internal" : "public";
                     console.log("cdaDefault: ", cdaDefault);
 
-                    var selectedBasin = urlParams.get('basin');
+                    var selectedBasin = urlParams.get('basin') || null;
                     console.log('selectedBasin: ', selectedBasin);
 
-                    var basin = urlParams.get('basin');
+                    var basin = urlParams.get('basin') || null;
                     console.log('basin: ', basin);
 
-                    var type = urlParams.get('type');
+                    var type = urlParams.get('type') || null;
                     console.log('type: ', type);
 
                     var cda = urlParams.get('cda') || cdaDefault;
@@ -76,6 +76,10 @@
                 </script>
                 <div id="loading_ld_gate_summary" style="display: none;"><img src="images/loading4.gif"
                         style='height: 50px; width: 50px;' alt="Loading..." /></div>
+                <div id="table_container_ld_gate_summary"></div>
+                <script src="ld_gate_summary.js"></script>
+
+                <!-- if type === blackberry -->
                 <div id="table_container_ld_gate_summary"></div>
                 <script src="ld_gate_summary.js"></script>
                 <!-- End Div -->
