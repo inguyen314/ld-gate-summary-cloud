@@ -1225,11 +1225,26 @@ function getHourlyDataOnTopOfHour(data, tsid) {
 
     data.values.forEach(entry => {
         const [timestamp, value, qualityCode] = entry;
-        const date = new Date(timestamp);
+
+        // Normalize the timestamp
+        let date;
+        if (typeof timestamp === "string") {
+            date = new Date(timestamp.replace(/-/g, '/')); // Replace hyphens with slashes for iOS
+        } else if (typeof timestamp === "number") {
+            date = new Date(timestamp); // Assume it's a UNIX timestamp
+        } else {
+            console.warn("Unrecognized timestamp format:", timestamp);
+            return; // Skip invalid entries
+        }
+
+        // Validate date
+        if (isNaN(date.getTime())) {
+            console.warn("Invalid date:", timestamp);
+            return; // Skip invalid dates
+        }
 
         // Check if the time is exactly at the top of the hour
-        if (date.getMinutes() === 0) {
-            // Append tsid to the object
+        if (date.getMinutes() === 0 && date.getSeconds() === 0) {
             hourlyData.push({ timestamp, value, qualityCode, tsid });
         }
     });
