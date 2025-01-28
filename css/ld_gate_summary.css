@@ -1,13 +1,19 @@
 /*** ===================================================================================== ***/
 /*** YOUR REPORT STYLE GOES HERE ***/
 /*** ===================================================================================== ***/
-#gage_data {
+#gage_data,
+#gage_data1,
+#gage_data2,
+#gage_data3 {
     border-collapse: collapse;
     width: 100%;
-    margin-bottom: 100px;
+    margin-bottom: 25px;
 }
 
-#gage_data th {
+#gage_data th,
+#gage_data1 th,
+#gage_data2 th,
+#gage_data3 th {
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: left;
@@ -18,70 +24,98 @@
     text-align: center;
 }
 
-#gage_data td a {
+#gage_data td a,
+#gage_data1 td a,
+#gage_data2 td a,
+#gage_data3 td a {
     text-decoration: none;
 }
 
-#gage_data th a {
+#gage_data th a,
+#gage_data1 th a,
+#gage_data2 th a,
+#gage_data3 th a {
     color: black;
     text-decoration: none;
 }
 
-#gage_data td {
+#gage_data td,
+#gage_data1 td,
+#gage_data2 td,
+#gage_data3 td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: center;
 }
 
 #gage_data td a:hover,
-#gage_data th a:hover {
+#gage_data1 td a:hover,
+#gage_data2 td a:hover,
+#gage_data3 td a:hover,
+#gage_data th a:hover,
+#gage_data1 th a:hover,
+#gage_data2 th a:hover,
+#gage_data3 th a:hover {
     text-decoration: underline;
 }
 
-#gage_data tr:nth-child(even) {
+#gage_data tr:nth-child(even),
+#gage_data1 tr:nth-child(even),
+#gage_data2 tr:nth-child(even),
+#gage_data3 tr:nth-child(even) {
     background-color: #f2f2f2;
 }
 
-#gage_data tr:hover {
+#gage_data tr:hover,
+#gage_data1 tr:hover,
+#gage_data2 tr:hover,
+#gage_data3 tr:hover {
     background-color: #ddd;
 }
 
 hr {
     border: none;
-    /* Remove any default border */
     border-top: 1px solid #000;
-    /* Set the top border to be 1 pixel thick and black */
 }
 
 /* Compact Styles for Small Screens */
 @media (max-width: 768px) {
-    #gage_data {
+
+    #gage_data,
+    #gage_data1,
+    #gage_data2,
+    #gage_data3 {
         margin-bottom: 20px;
-        /* Adjust bottom margin for smaller screens */
     }
 
     #gage_data th,
-    #gage_data td {
+    #gage_data1 th,
+    #gage_data2 th,
+    #gage_data3 th,
+    #gage_data td,
+    #gage_data1 td,
+    #gage_data2 td,
+    #gage_data3 td {
         font-size: 0.9em;
-        /* Reduce font size */
         padding: 3px;
-        /* Reduce padding for compact design */
     }
 
-    #gage_data td {
+    #gage_data td,
+    #gage_data1 td,
+    #gage_data2 td,
+    #gage_data3 td {
         text-align: left;
-        /* Align text left for readability */
         padding: 0px;
-        /* Remove padding for a tighter fit */
     }
 
-    #gage_data th {
+    #gage_data th,
+    #gage_data1 th,
+    #gage_data2 th,
+    #gage_data3 th {
         text-align: left;
-        /* Align headers left for mobile readability */
     }
 
     hr {
         border-top: 1px solid #ddd;
-        /* Lighter border for better appearance */
     }
 }

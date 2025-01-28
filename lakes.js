@@ -7,18 +7,17 @@ document.addEventListener('DOMContentLoaded', async function () {
     let setTimeseriesGroup1 = null;
     let setTimeseriesGroup2 = null;
     let setTimeseriesGroup3 = null;
-    let setTimeseriesGroup4 = null;
-    let setTimeseriesGroup5 = null;
     let setLookBackHours = null;
     let setReportDiv = null;
 
-    console.log("********************* blackberry *******************");
+    console.log("********************* lakes *******************");
     // Set the category and base URL for API calls
-    setReportDiv = "blackberry";
-    setLocationCategory = "BlackBerry";
-    setLocationGroupOwner = "BlackBerry";
+    setReportDiv = "lakes";
+    setLocationCategory = "Lakes";
+    setLocationGroupOwner = "Project";
     setTimeseriesGroup1 = "Stage";
     setTimeseriesGroup2 = "Flow";
+    setTimeseriesGroup3 = "Conc-DO";
     setLookBackHours = subtractHoursFromDate(new Date(), 6);
 
     // Display the loading indicator for water quality alarm
@@ -29,6 +28,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     console.log("setLocationGroupOwner: ", setLocationGroupOwner);
     console.log("setTimeseriesGroup1: ", setTimeseriesGroup1);
     console.log("setTimeseriesGroup2: ", setTimeseriesGroup2);
+    console.log("setTimeseriesGroup3: ", setTimeseriesGroup3);
+
     console.log("setLookBackHours: ", setLookBackHours);
 
     let setBaseUrl = null;
@@ -48,11 +49,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     const ownerMap = new Map();
     const tsidStageMap = new Map();
     const tsidTwMap = new Map();
+    const tsidHingePointMap = new Map();
 
     // Initialize arrays for storing promises
     const ownerPromises = [];
     const stageTsidPromises = [];
     const twTsidPromises = [];
+    const hingePointTsidPromises = [];
 
     // Fetch location group data from the API
     fetch(categoryApiUrl)
@@ -195,6 +198,29 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                     })
                                             );
                                         })();
+
+                                        // Fetch tsid 3
+                                        (() => {
+                                            const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup3}?office=${office}&category-id=${loc['location-id']}`;
+                                            // console.log('tsidApiUrl:', tsidApiUrl);
+                                            hingePointTsidPromises.push(
+                                                fetch(tsidApiUrl)
+                                                    .then(response => {
+                                                        if (response.status === 404) return null; // Skip if not found
+                                                        if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                                                        return response.json();
+                                                    })
+                                                    .then(data => {
+                                                        // // console.log('data:', data);
+                                                        if (data) {
+                                                            tsidHingePointMap.set(loc['location-id'], data);
+                                                        }
+                                                    })
+                                                    .catch(error => {
+                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                    })
+                                            );
+                                        })();
                                     })();
                                 });
                             }
@@ -210,6 +236,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 .then(() => Promise.all(ownerPromises))
                 .then(() => Promise.all(stageTsidPromises))
                 .then(() => Promise.all(twTsidPromises))
+                .then(() => Promise.all(hingePointTsidPromises))
                 .then(() => {
                     combinedData.forEach(basinData => {
                         if (basinData['assigned-locations']) {
@@ -243,6 +270,15 @@ document.addEventListener('DOMContentLoaded', async function () {
                                         loc['tsid-tw'] = tsidTwMapData;
                                     } else {
                                         loc['tsid-tw'] = null;
+                                    }
+
+                                    // Append tsid 3
+                                    const tsidHingePointMapData = tsidHingePointMap.get(loc['location-id']);
+                                    if (tsidHingePointMapData) {
+                                        reorderByAttribute(tsidHingePointMapData);
+                                        loc['tsid-hinge-point'] = tsidHingePointMapData;
+                                    } else {
+                                        loc['tsid-hinge-point'] = null;
                                     }
                                 })();
                             });
@@ -575,19 +611,19 @@ document.addEventListener('DOMContentLoaded', async function () {
                 // Create a row for the location ID spanning 6 columns
                 const locationRow = document.createElement('tr');
                 const locationCell = document.createElement('th');
-                locationCell.colSpan = 3; // Set colspan to 6 for location ID
-                locationCell.style.backgroundColor = 'darkgreen'; // Set background color
+                locationCell.colSpan = 4; // Set colspan to 6 for location ID
+                locationCell.style.backgroundColor = 'darkslategrey'; // Set background color
                 locationCell.textContent = location['location-id'];
                 locationRow.appendChild(locationCell);
                 table.appendChild(locationRow); // Append the location row to the table
 
                 // Create a header row for the data columns
                 const headerRow = document.createElement('tr');
-                const columns = ["Date Time", "Stage (ft)", "Flow (cfs)"];
+                const columns = ["Date Time", "Stage NGVD29 (ft)", "Flow (cfs)", "Conc-DO (ppm)"];
                 columns.forEach((columnName) => {
                     const th = document.createElement('th');
                     th.textContent = columnName; // Set the header text
-                    th.style.backgroundColor = 'darkgreen'; // Set background color
+                    th.style.backgroundColor = 'darkslategrey'; // Set background color
                     headerRow.appendChild(th); // Append header cells to the header row
                 });
                 table.appendChild(headerRow); // Append the header row to the table
@@ -633,8 +669,11 @@ document.addEventListener('DOMContentLoaded', async function () {
                     const tailWaterEntry = location['tw-hourly-value']?.[0]?.find(tailWater => tailWater.timestamp === dateTime);
                     const tailWaterValue = tailWaterEntry ? tailWaterEntry.value.toFixed(0) : "--"; // Use "--" if no match
 
+                    const hingePointEntry = location['hinge-point-hourly-value']?.[0]?.find(hingePoint => hingePoint.timestamp === dateTime);
+                    const hingePointValue = hingePointEntry ? hingePointEntry.value.toFixed(2) : "--"; // Use "--" if no match
+
                     // Create and append cells to the row for each value
-                    [dateTimeDisplay, poolValue, tailWaterValue].forEach((value) => {
+                    [dateTimeDisplay, poolValue, tailWaterValue, hingePointValue].forEach((value) => {
                         const cell = document.createElement('td'); // Create a new cell for each value
                         cell.textContent = value; // Set the cell text
                         row.appendChild(cell); // Append the cell to the row

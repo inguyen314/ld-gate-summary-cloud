@@ -80,6 +80,25 @@
                     console.log("Is this site viewed on mobile?", mobile);
                 </script>
 
+                <script>
+                    // Function to detect if the device is mobile
+                    function isMobile() {
+                        return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                    }
+
+                    // Function to print the table if the device is mobile
+                    function printTableIfMobile() {
+                        if (isMobile()) {
+                            document.getElementById("gage_data1").style.display = "table";
+                            document.getElementById("gage_data2").style.display = "table";
+                            document.getElementById("gage_data3").style.display = "table";
+                        }
+                    }
+
+                    // Call the function when the page loads
+                    window.onload = printTableIfMobile;
+                </script>
+
                 <div id="loading_ld_gate_summary" style="display: none;"><img src="images/loading4.gif"
                         style='height: 50px; width: 50px;' alt="Loading..." /></div>
                 <div id="table_container_ld_gate_summary"></div>
@@ -90,7 +109,109 @@
                         style='height: 50px; width: 50px;' alt="Loading..." /></div>
                 <div id="table_container_blackberry"></div>
                 <script src="blackberry.js"></script>
+
+                <div id="loading_lakes" style="display: none;"><img src="images/loading4.gif"
+                        style='height: 50px; width: 50px;' alt="Loading..." /></div>
+                <div id="table_container_lakes"></div>
+                <script src="lakes.js"></script>
                 <!-- End Div -->
+
+                <table id="gage_data1" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Locks and Dams</th>
+                            <th>Work</th>
+                            <th>Mobile</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>LD 22</td>
+                            <td>573-221-0294</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>LD 24</td>
+                            <td>573-242-3524</td>
+                            <td>573-242-3510</td>
+                        </tr>
+                        <tr>
+                            <td>LD 25</td>
+                            <td>636-566-8120</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Mel Price</td>
+                            <td>618-462-1713</td>
+                            <td>636-899-1543</td>
+                        </tr>
+                        <tr>
+                            <td>LD 27</td>
+                            <td>618-452-7107</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Kaskaskia LD</td>
+                            <td>618-284-7160</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table id="gage_data2" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Locks and Dams</th>
+                            <th>Work</th>
+                            <th>Mobile</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Carlyle</td>
+                            <td>618-594-2484</td>
+                            <td>618-274-2008</td>
+                        </tr>
+                        <tr>
+                            <td>Mark Twain</td>
+                            <td>573-735-4097</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Rend</td>
+                            <td>618-724-2493</td>
+                            <td>618-724-7069</td>
+                        </tr>
+                        <tr>
+                            <td>Shelbyville</td>
+                            <td>217-774-3951</td>
+                            <td>217-383-1747</td>
+                        </tr>
+                        <tr>
+                            <td>Wappapello</td>
+                            <td>573-222-8562</td>
+                            <td>573-464-7214</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table id="gage_data3" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>NWS NCRFC</th>
+                            <th>Work</th>
+                            <th>Mobile</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Operations</td>
+                            <td>952-361-6660</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br>
             </div>
             <button id="returnTop" title="Return to Top of Page">Top</button>
         </div>
