@@ -73,15 +73,23 @@
 
                     var office = urlParams.get('office') || "MVS";
                     console.log('office: ', office);
+
+                    let mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+                        || window.innerWidth <= 768;
+
+                    console.log("Is this site viewed on mobile?", mobile);
                 </script>
+
                 <div id="loading_ld_gate_summary" style="display: none;"><img src="images/loading4.gif"
                         style='height: 50px; width: 50px;' alt="Loading..." /></div>
                 <div id="table_container_ld_gate_summary"></div>
                 <script src="ld_gate_summary.js"></script>
 
                 <!-- if type === blackberry -->
-                <div id="table_container_ld_gate_summary"></div>
-                <script src="ld_gate_summary.js"></script>
+                <div id="loading_blackberry" style="display: none;"><img src="images/loading4.gif"
+                        style='height: 50px; width: 50px;' alt="Loading..." /></div>
+                <div id="table_container_blackberry"></div>
+                <script src="blackberry.js"></script>
                 <!-- End Div -->
             </div>
             <button id="returnTop" title="Return to Top of Page">Top</button>
@@ -108,7 +116,7 @@
         const urlParams = new URLSearchParams(window.location.search);
 
         // Update the Title
-        title = `${office} - Realtime LD Gate Summary`;
+        title = `${office} Realtime LD Gate Summary`;
 
 
         if (title) {
