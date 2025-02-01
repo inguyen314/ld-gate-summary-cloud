@@ -1289,23 +1289,22 @@ document.addEventListener('DOMContentLoaded', async function () {
                         dateTimeDisplay = dateTime;
                     }
 
-
                     // Check if the current timestamp matches any poolValue timestamp
                     const poolValueEntry = location['stage-hourly-value'][0].find(poolValue => poolValue.timestamp === dateTime);
-                    const poolValue = poolValueEntry ? poolValueEntry.value.toFixed(2) : "--"; // Use "--" if no match
+                    const poolValue = poolValueEntry && typeof poolValueEntry.value === 'number' ? poolValueEntry.value.toFixed(2) : "--";
 
                     // Match timestamps and grab values for tailWaterValue, hingePointValue, tainterValue, and rollerValue
                     const tailWaterEntry = location['tw-hourly-value']?.[0]?.find(tailWater => tailWater.timestamp === dateTime);
-                    const tailWaterValue = tailWaterEntry ? tailWaterEntry.value.toFixed(2) : "--"; // Use "--" if no match
+                    const tailWaterValue = tailWaterEntry && typeof tailWaterEntry.value === 'number' ? tailWaterEntry.value.toFixed(2) : "--";
 
                     const hingePointEntry = location['hinge-point-hourly-value']?.[0]?.find(hingePoint => hingePoint.timestamp === dateTime);
-                    const hingePointValue = hingePointEntry ? hingePointEntry.value.toFixed(2) : "--"; // Use "--" if no match
+                    const hingePointValue = hingePointEntry && typeof hingePointEntry.value === 'number' ? hingePointEntry.value.toFixed(2) : "--";
 
                     const tainterEntry = location['tainter-hourly-value']?.[0]?.find(tainter => tainter.timestamp === dateTime);
-                    const tainterValue = tainterEntry ? tainterEntry.value.toFixed(2) : "--"; // Use "--" if no match
+                    const tainterValue = tainterEntry && typeof tainterEntry.value === 'number' ? tainterEntry.value.toFixed(2) : "--";
 
                     const rollerEntry = location['roller-hourly-value']?.[0]?.find(roller => roller.timestamp === dateTime);
-                    const rollerValue = rollerEntry ? rollerEntry.value.toFixed(2) : "--"; // Use "--" if no match
+                    const rollerValue = rollerEntry && typeof rollerEntry.value === 'number' ? rollerEntry.value.toFixed(2) : "--";
 
                     // Create and append cells to the row for each value
                     [dateTimeDisplay, poolValue, tailWaterValue, hingePointValue, tainterValue, rollerValue].forEach((value) => {
