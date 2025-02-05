@@ -609,8 +609,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         combinedData.forEach((basin) => {
             // Loop through each assigned location in the basin
             basin['assigned-locations'].forEach((location) => {
-                // console.log("location-id: ", location['location-id']);
-
                 // Create a row for the location ID spanning 6 columns
                 const locationRow = document.createElement('tr');
                 const locationCell = document.createElement('th');
@@ -623,6 +621,20 @@ document.addEventListener('DOMContentLoaded', async function () {
                 // Create a header row for the data columns
                 const headerRow = document.createElement('tr');
                 const columns = ["Date Time", "Stage (ft)", "Outflow 1 (cfs)", "Outflow 2 (cfs)", "DO (ppm)"];
+
+                // Dynamically set header text for Outflow 1 and Outflow 2
+                const controlPointEntry = location['control-point-hourly-value']?.[0]?.[0]; // Assuming the first entry contains the tsid
+                const controlPointEntry2 = location['control-point-hourly-value']?.[1]?.[0]; // Assuming the second entry contains the tsid
+
+                // Inline extraction of "Breese" from controlPointTsid
+                if (controlPointEntry) {
+                    columns[2] = `Outflow 1 (cfs) - ${controlPointEntry.tsid.split('-')[0]}`; // Extract "Breese" directly
+                }
+                if (controlPointEntry2) {
+                    columns[3] = `Outflow 2 (cfs) - ${controlPointEntry2.tsid.split('-')[0]}`; // Extract "Breese" directly
+                }
+
+                // Append column headers
                 columns.forEach((columnName) => {
                     const th = document.createElement('th');
                     th.textContent = columnName; // Set the header text
@@ -659,15 +671,15 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                     // Check if the current timestamp matches any poolValue timestamp
                     const poolValueEntry = location['stage-hourly-value'][0].find(poolValue => poolValue.timestamp === dateTime);
-                    const poolValue = poolValueEntry ? poolValueEntry.value.toFixed(2) : "--"; 
+                    const poolValue = poolValueEntry ? poolValueEntry.value.toFixed(2) : "--";
 
                     // Match timestamps and grab values for tailWaterValue, controlPointValue, tainterValue, and rollerValue
                     const controlPointEntry = location['control-point-hourly-value']?.[0]?.find(controlPoint => controlPoint.timestamp === dateTime);
-                    const controlPointValue = controlPointEntry ? controlPointEntry.value.toFixed(0) : "--"; 
+                    const controlPointValue = controlPointEntry ? controlPointEntry.value.toFixed(0) : "--";
                     const controlPointTsid = controlPointEntry ? controlPointEntry.tsid : "--";
 
                     const controlPointEntry2 = location['control-point-hourly-value']?.[1]?.find(controlPoint => controlPoint.timestamp === dateTime);
-                    const controlPointValue2 = controlPointEntry2 ? controlPointEntry2.value.toFixed(0) : "--"; 
+                    const controlPointValue2 = controlPointEntry2 ? controlPointEntry2.value.toFixed(0) : "--";
 
                     const doEntry = location['do-hourly-value']?.[0]?.find(_do => _do.timestamp === dateTime);
                     const tainterValue = doEntry && typeof doEntry.value === 'number' ? doEntry.value.toFixed(2) : "--";
