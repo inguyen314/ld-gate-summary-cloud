@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     setLocationCategory = "Lakes";
     setLocationGroupOwner = "Project";
     setTimeseriesGroup1 = "Stage";
-    setTimeseriesGroup2 = "Flow";
+    setTimeseriesGroup2 = "Control-Point";
     setTimeseriesGroup3 = "Conc-DO";
     setLookBackHours = subtractHoursFromDate(new Date(), 6);
 
@@ -48,14 +48,14 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Initialize maps to store metadata and time-series ID (TSID) data for various parameters
     const ownerMap = new Map();
     const tsidStageMap = new Map();
-    const tsidTwMap = new Map();
-    const tsidHingePointMap = new Map();
+    const tsidControlPointMap = new Map();
+    const tsidDoMap = new Map();
 
     // Initialize arrays for storing promises
     const ownerPromises = [];
     const stageTsidPromises = [];
-    const twTsidPromises = [];
-    const hingePointTsidPromises = [];
+    const controlPointTsidPromises = [];
+    const doTsidPromises = [];
 
     // Fetch location group data from the API
     fetch(categoryApiUrl)
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const targetCategory = { "office-id": office, "id": setLocationCategory };
             const filteredArray = filterByLocationCategory(data, targetCategory);
             let basins = filteredArray.map(item => item.id);
-            console.log("basins: ", basins);
+            // console.log("basins: ", basins);
 
             // Set basins to current basin if set in the url
             // basins = basins.filter(basinId => basin.includes(basinId));
@@ -178,10 +178,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                                         // Fetch tsid 2
                                         (() => {
-                                            const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup2}?office=${office}&category-id=${loc['location-id']}`;
-                                            // console.log('tsidApiUrl:', tsidApiUrl);
-                                            twTsidPromises.push(
-                                                fetch(tsidApiUrl)
+                                            const tsidHingePointApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup2}?office=${office}&category-id=${loc['location-id']}`;
+                                            // console.log('tsidHingePointApiUrl:', tsidHingePointApiUrl);
+                                            controlPointTsidPromises.push(
+                                                fetch(tsidHingePointApiUrl)
                                                     .then(response => {
                                                         if (response.status === 404) return null; // Skip if not found
                                                         if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
@@ -190,21 +190,21 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                     .then(data => {
                                                         // // console.log('data:', data);
                                                         if (data) {
-                                                            tsidTwMap.set(loc['location-id'], data);
+                                                            tsidControlPointMap.set(loc['location-id'], data);
                                                         }
                                                     })
                                                     .catch(error => {
-                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidHingePointApiUrl}:`, error);
                                                     })
                                             );
                                         })();
 
                                         // Fetch tsid 3
                                         (() => {
-                                            const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup3}?office=${office}&category-id=${loc['location-id']}`;
-                                            // console.log('tsidApiUrl:', tsidApiUrl);
-                                            hingePointTsidPromises.push(
-                                                fetch(tsidApiUrl)
+                                            const tsidDoApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup3}?office=${office}&category-id=${loc['location-id']}`;
+                                            // console.log('tsidDoApiUrl:', tsidDoApiUrl);
+                                            doTsidPromises.push(
+                                                fetch(tsidDoApiUrl)
                                                     .then(response => {
                                                         if (response.status === 404) return null; // Skip if not found
                                                         if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
@@ -213,11 +213,11 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                     .then(data => {
                                                         // // console.log('data:', data);
                                                         if (data) {
-                                                            tsidHingePointMap.set(loc['location-id'], data);
+                                                            tsidDoMap.set(loc['location-id'], data);
                                                         }
                                                     })
                                                     .catch(error => {
-                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidDoApiUrl}:`, error);
                                                     })
                                             );
                                         })();
@@ -235,8 +235,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             Promise.all(apiPromises)
                 .then(() => Promise.all(ownerPromises))
                 .then(() => Promise.all(stageTsidPromises))
-                .then(() => Promise.all(twTsidPromises))
-                .then(() => Promise.all(hingePointTsidPromises))
+                .then(() => Promise.all(controlPointTsidPromises))
+                .then(() => Promise.all(doTsidPromises))
                 .then(() => {
                     combinedData.forEach(basinData => {
                         if (basinData['assigned-locations']) {
@@ -264,21 +264,21 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     }
 
                                     // Append tsid 2
-                                    const tsidTwMapData = tsidTwMap.get(loc['location-id']);
+                                    const tsidTwMapData = tsidControlPointMap.get(loc['location-id']);
                                     if (tsidTwMapData) {
                                         reorderByAttribute(tsidTwMapData);
-                                        loc['tsid-tw'] = tsidTwMapData;
+                                        loc['tsid-control-point'] = tsidTwMapData;
                                     } else {
-                                        loc['tsid-tw'] = null;
+                                        loc['tsid-control-point'] = null;
                                     }
 
                                     // Append tsid 3
-                                    const tsidHingePointMapData = tsidHingePointMap.get(loc['location-id']);
+                                    const tsidHingePointMapData = tsidDoMap.get(loc['location-id']);
                                     if (tsidHingePointMapData) {
                                         reorderByAttribute(tsidHingePointMapData);
-                                        loc['tsid-hinge-point'] = tsidHingePointMapData;
+                                        loc['tsid-do'] = tsidHingePointMapData;
                                     } else {
-                                        loc['tsid-hinge-point'] = null;
+                                        loc['tsid-do'] = null;
                                     }
                                 })();
                             });
@@ -389,7 +389,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                         for (const locData of dataArray['assigned-locations'] || []) {
                             // Handle temperature, depth, and DO time series
                             const stageTimeSeries = locData['tsid-stage']?.['assigned-time-series'] || [];
-                            const twTimeSeries = locData['tsid-tw']?.['assigned-time-series'] || [];
+                            const controlPointTimeSeries = locData['tsid-control-point']?.['assigned-time-series'] || [];
+                            const doTimeSeries = locData['tsid-do']?.['assigned-time-series'] || [];
 
                             // Function to create fetch promises for time series data
                             const timeSeriesDataFetchPromises = (timeSeries, type) => {
@@ -429,7 +430,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                             // Create promises for temperature, depth, and DO time series
                             const stagePromises = timeSeriesDataFetchPromises(stageTimeSeries, 'stage');
-                            const twPromises = timeSeriesDataFetchPromises(twTimeSeries, 'tw');
+                            const controlPointPromises = timeSeriesDataFetchPromises(controlPointTimeSeries, 'control-point');
+                            const doPromises = timeSeriesDataFetchPromises(doTimeSeries, 'do');
 
                             // Additional API call for extents data
                             const timeSeriesDataExtentsApiCall = async (type) => {
@@ -448,11 +450,12 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     locData[`extents-data`] = {};
 
                                     // Collect TSIDs from temp, depth, and DO time series
-                                    const stageTids = stageTimeSeries.map(series => series['timeseries-id']);
-                                    const twTids = twTimeSeries.map(series => series['timeseries-id']);
-                                    const allTids = [...stageTids, ...twTids];
+                                    const stageTsids = stageTimeSeries.map(series => series['timeseries-id']);
+                                    const controlPointTsids = controlPointTimeSeries.map(series => series['timeseries-id']);
+                                    const doTsids = doTimeSeries.map(series => series['timeseries-id']);
+                                    const allTsids = [...stageTsids, ...controlPointTsids, ...doTsids];
 
-                                    allTids.forEach((tsid, index) => {
+                                    allTsids.forEach((tsid, index) => {
                                         const matchingEntry = data.entries.find(entry => entry['name'] === tsid);
                                         if (matchingEntry) {
                                             // Convert times from UTC
@@ -517,7 +520,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                             };
 
                             // Combine all promises for this location
-                            timeSeriesDataPromises.push(Promise.all([...stagePromises, ...twPromises, timeSeriesDataExtentsApiCall()]));
+                            timeSeriesDataPromises.push(Promise.all([...stagePromises, ...controlPointPromises, ...doPromises, timeSeriesDataExtentsApiCall()]));
                         }
                     }
 
@@ -525,9 +528,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                     return Promise.all(timeSeriesDataPromises);
                 })
                 .then(() => {
-                    console.log('All combinedData data fetched successfully:', combinedData);
+                    console.log('All combinedData data fetched successfully (lakes):', combinedData);
 
-                    const table = createTableBlackBerry(combinedData, type, mobile);
+                    const table = createTableLakes(combinedData, type, mobile);
                     const container = document.getElementById(`table_container_${setReportDiv}`);
                     container.appendChild(table);
 
@@ -597,7 +600,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         return hourlyData;
     }
 
-    function createTableBlackBerry(combinedData, type, mobile) {
+    function createTableLakes(combinedData, type, mobile) {
         // Create a new table element and set its ID
         const table = document.createElement('table');
         table.setAttribute('id', 'gage_data');
@@ -611,7 +614,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 // Create a row for the location ID spanning 6 columns
                 const locationRow = document.createElement('tr');
                 const locationCell = document.createElement('th');
-                locationCell.colSpan = 4; // Set colspan to 6 for location ID
+                locationCell.colSpan = 5; // Set colspan to 6 for location ID
                 locationCell.style.backgroundColor = 'darkslategrey'; // Set background color
                 locationCell.textContent = location['location-id'];
                 locationRow.appendChild(locationCell);
@@ -619,7 +622,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                 // Create a header row for the data columns
                 const headerRow = document.createElement('tr');
-                const columns = ["Date Time", "Stage NGVD29 (ft)", "Flow (cfs)", "Conc-DO (ppm)"];
+                const columns = ["Date Time", "Stage (ft)", "Outflow 1 (cfs)", "Outflow 2 (cfs)", "DO (ppm)"];
                 columns.forEach((columnName) => {
                     const th = document.createElement('th');
                     th.textContent = columnName; // Set the header text
@@ -672,8 +675,11 @@ document.addEventListener('DOMContentLoaded', async function () {
                     const hingePointEntry = location['hinge-point-hourly-value']?.[0]?.find(hingePoint => hingePoint.timestamp === dateTime);
                     const hingePointValue = hingePointEntry ? hingePointEntry.value.toFixed(2) : "--"; // Use "--" if no match
 
+                    const tainterEntry = location['tainter-hourly-value']?.[0]?.find(tainter => tainter.timestamp === dateTime);
+                    const tainterValue = tainterEntry && typeof tainterEntry.value === 'number' ? tainterEntry.value.toFixed(2) : "--";
+
                     // Create and append cells to the row for each value
-                    [dateTimeDisplay, poolValue, tailWaterValue, hingePointValue].forEach((value) => {
+                    [dateTimeDisplay, poolValue, tailWaterValue, hingePointValue, tainterValue].forEach((value) => {
                         const cell = document.createElement('td'); // Create a new cell for each value
                         cell.textContent = value; // Set the cell text
                         row.appendChild(cell); // Append the cell to the row
