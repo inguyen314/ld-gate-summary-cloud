@@ -631,13 +631,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                 });
                 table.appendChild(headerRow); // Append the header row to the table
 
-                // Sort stage-hourly-value array by timestamp in descending order
-                // const sortedEntries = location['stage-hourly-value'][0].slice().sort((a, b) => {
-                //     const dateA = new Date(a.timestamp);
-                //     const dateB = new Date(b.timestamp);
-                //     return dateB - dateA; // Descending order
-                // });
-
                 const sortedEntries = location['stage-hourly-value'][0].slice().sort((a, b) => {
                     // Convert MM-DD-YYYY HH:mm to YYYY-MM-DDTHH:mm:ss for reliable parsing
                     const normalizeDate = (timestamp) => {
@@ -666,20 +659,21 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                     // Check if the current timestamp matches any poolValue timestamp
                     const poolValueEntry = location['stage-hourly-value'][0].find(poolValue => poolValue.timestamp === dateTime);
-                    const poolValue = poolValueEntry ? poolValueEntry.value.toFixed(2) : "--"; // Use "--" if no match
+                    const poolValue = poolValueEntry ? poolValueEntry.value.toFixed(2) : "--"; 
 
-                    // Match timestamps and grab values for tailWaterValue, hingePointValue, tainterValue, and rollerValue
-                    const tailWaterEntry = location['tw-hourly-value']?.[0]?.find(tailWater => tailWater.timestamp === dateTime);
-                    const tailWaterValue = tailWaterEntry ? tailWaterEntry.value.toFixed(0) : "--"; // Use "--" if no match
+                    // Match timestamps and grab values for tailWaterValue, controlPointValue, tainterValue, and rollerValue
+                    const controlPointEntry = location['control-point-hourly-value']?.[0]?.find(controlPoint => controlPoint.timestamp === dateTime);
+                    const controlPointValue = controlPointEntry ? controlPointEntry.value.toFixed(0) : "--"; 
+                    const controlPointTsid = controlPointEntry ? controlPointEntry.tsid : "--";
 
-                    const hingePointEntry = location['hinge-point-hourly-value']?.[0]?.find(hingePoint => hingePoint.timestamp === dateTime);
-                    const hingePointValue = hingePointEntry ? hingePointEntry.value.toFixed(2) : "--"; // Use "--" if no match
+                    const controlPointEntry2 = location['control-point-hourly-value']?.[1]?.find(controlPoint => controlPoint.timestamp === dateTime);
+                    const controlPointValue2 = controlPointEntry2 ? controlPointEntry2.value.toFixed(0) : "--"; 
 
-                    const tainterEntry = location['tainter-hourly-value']?.[0]?.find(tainter => tainter.timestamp === dateTime);
-                    const tainterValue = tainterEntry && typeof tainterEntry.value === 'number' ? tainterEntry.value.toFixed(2) : "--";
+                    const doEntry = location['do-hourly-value']?.[0]?.find(_do => _do.timestamp === dateTime);
+                    const tainterValue = doEntry && typeof doEntry.value === 'number' ? doEntry.value.toFixed(2) : "--";
 
                     // Create and append cells to the row for each value
-                    [dateTimeDisplay, poolValue, tailWaterValue, hingePointValue, tainterValue].forEach((value) => {
+                    [dateTimeDisplay, poolValue, controlPointValue, controlPointValue2, tainterValue].forEach((value) => {
                         const cell = document.createElement('td'); // Create a new cell for each value
                         cell.textContent = value; // Set the cell text
                         row.appendChild(cell); // Append the cell to the row
