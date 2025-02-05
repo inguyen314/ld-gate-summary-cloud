@@ -353,12 +353,14 @@ document.addEventListener('DOMContentLoaded', async function () {
                         for (const locData of dataArray['assigned-locations'] || []) {
                             // Handle temperature, depth, and DO time series
                             const stageTimeSeries = locData['tsid-stage']?.['assigned-time-series'] || [];
-                            const twTimeSeries = locData['tsid-flow']?.['assigned-time-series'] || [];
+                            const flowTimeSeries = locData['tsid-flow']?.['assigned-time-series'] || [];
 
                             // Function to create fetch promises for time series data
                             const timeSeriesDataFetchPromises = (timeSeries, type) => {
                                 return timeSeries.map((series, index) => {
                                     const tsid = series['timeseries-id'];
+                                    // console.log('tsid:', tsid);
+
                                     const timeSeriesDataApiUrl = setBaseUrl + `timeseries?page-size=5000&name=${tsid}&begin=${setLookBackHours.toISOString()}&end=${currentDateTime.toISOString()}&office=${office}`;
                                     // console.log('timeSeriesDataApiUrl:', timeSeriesDataApiUrl);
 
@@ -393,7 +395,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                             // Create promises for temperature, depth, and DO time series
                             const stagePromises = timeSeriesDataFetchPromises(stageTimeSeries, 'stage');
-                            const twPromises = timeSeriesDataFetchPromises(twTimeSeries, 'tw');
+                            const flowPromises = timeSeriesDataFetchPromises(flowTimeSeries, 'flow');
 
                             // Additional API call for extents data
                             const timeSeriesDataExtentsApiCall = async (type) => {
@@ -413,8 +415,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                                     // Collect TSIDs from temp, depth, and DO time series
                                     const stageTids = stageTimeSeries.map(series => series['timeseries-id']);
-                                    const twTids = twTimeSeries.map(series => series['timeseries-id']);
-                                    const allTids = [...stageTids, ...twTids];
+                                    const flowTids = flowTimeSeries.map(series => series['timeseries-id']);
+                                    const allTids = [...stageTids, ...flowTids];
 
                                     allTids.forEach((tsid, index) => {
                                         const matchingEntry = data.entries.find(entry => entry['name'] === tsid);
@@ -481,7 +483,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                             };
 
                             // Combine all promises for this location
-                            timeSeriesDataPromises.push(Promise.all([...stagePromises, ...twPromises, timeSeriesDataExtentsApiCall()]));
+                            timeSeriesDataPromises.push(Promise.all([...stagePromises, ...flowPromises, timeSeriesDataExtentsApiCall()]));
                         }
                     }
 
@@ -489,7 +491,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     return Promise.all(timeSeriesDataPromises);
                 })
                 .then(() => {
-                    console.log('All combinedData data fetched successfully:', combinedData);
+                    console.log('All combinedData data fetched successfully (blackberry):', combinedData);
 
                     const table = createTableBlackBerry(combinedData, type, mobile);
                     const container = document.getElementById(`table_container_${setReportDiv}`);
@@ -630,7 +632,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     const poolValue = poolValueEntry ? poolValueEntry.value.toFixed(2) : "--"; // Use "--" if no match
 
                     // Match timestamps and grab values for tailWaterValue, hingePointValue, tainterValue, and rollerValue
-                    const tailWaterEntry = location['tw-hourly-value']?.[0]?.find(tailWater => tailWater.timestamp === dateTime);
+                    const tailWaterEntry = location['flow-hourly-value']?.[0]?.find(tailWater => tailWater.timestamp === dateTime);
                     const tailWaterValue = tailWaterEntry ? tailWaterEntry.value.toFixed(0) : "--"; // Use "--" if no match
 
                     // Create and append cells to the row for each value
