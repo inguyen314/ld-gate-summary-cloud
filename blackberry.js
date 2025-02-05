@@ -47,12 +47,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Initialize maps to store metadata and time-series ID (TSID) data for various parameters
     const ownerMap = new Map();
     const tsidStageMap = new Map();
-    const tsidTwMap = new Map();
+    const tsidFlowMap = new Map();
 
     // Initialize arrays for storing promises
     const ownerPromises = [];
     const stageTsidPromises = [];
-    const twTsidPromises = [];
+    const flowTsidPromises = [];
 
     // Fetch location group data from the API
     fetch(categoryApiUrl)
@@ -175,10 +175,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                                         // Fetch tsid 2
                                         (() => {
-                                            const tsidApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup2}?office=${office}&category-id=${loc['location-id']}`;
-                                            // console.log('tsidApiUrl:', tsidApiUrl);
-                                            twTsidPromises.push(
-                                                fetch(tsidApiUrl)
+                                            const tsidFlowApiUrl = setBaseUrl + `timeseries/group/${setTimeseriesGroup2}?office=${office}&category-id=${loc['location-id']}`;
+                                            // console.log('tsidFlowApiUrl:', tsidFlowApiUrl);
+                                            flowTsidPromises.push(
+                                                fetch(tsidFlowApiUrl)
                                                     .then(response => {
                                                         if (response.status === 404) return null; // Skip if not found
                                                         if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
@@ -187,11 +187,11 @@ document.addEventListener('DOMContentLoaded', async function () {
                                                     .then(data => {
                                                         // // console.log('data:', data);
                                                         if (data) {
-                                                            tsidTwMap.set(loc['location-id'], data);
+                                                            tsidFlowMap.set(loc['location-id'], data);
                                                         }
                                                     })
                                                     .catch(error => {
-                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidApiUrl}:`, error);
+                                                        console.error(`Problem with the fetch operation for stage TSID data at ${tsidFlowApiUrl}:`, error);
                                                     })
                                             );
                                         })();
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             Promise.all(apiPromises)
                 .then(() => Promise.all(ownerPromises))
                 .then(() => Promise.all(stageTsidPromises))
-                .then(() => Promise.all(twTsidPromises))
+                .then(() => Promise.all(flowTsidPromises))
                 .then(() => {
                     combinedData.forEach(basinData => {
                         if (basinData['assigned-locations']) {
@@ -237,12 +237,12 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     }
 
                                     // Append tsid 2
-                                    const tsidTwMapData = tsidTwMap.get(loc['location-id']);
+                                    const tsidTwMapData = tsidFlowMap.get(loc['location-id']);
                                     if (tsidTwMapData) {
                                         reorderByAttribute(tsidTwMapData);
-                                        loc['tsid-tw'] = tsidTwMapData;
+                                        loc['tsid-flow'] = tsidTwMapData;
                                     } else {
-                                        loc['tsid-tw'] = null;
+                                        loc['tsid-flow'] = null;
                                     }
                                 })();
                             });
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                         for (const locData of dataArray['assigned-locations'] || []) {
                             // Handle temperature, depth, and DO time series
                             const stageTimeSeries = locData['tsid-stage']?.['assigned-time-series'] || [];
-                            const twTimeSeries = locData['tsid-tw']?.['assigned-time-series'] || [];
+                            const twTimeSeries = locData['tsid-flow']?.['assigned-time-series'] || [];
 
                             // Function to create fetch promises for time series data
                             const timeSeriesDataFetchPromises = (timeSeries, type) => {
