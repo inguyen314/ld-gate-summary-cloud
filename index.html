@@ -51,24 +51,30 @@
                     // Calculate the document root
                     const documentRoot = window.location.protocol + "//" + window.location.host + "/";
 
-                    // Determine the default value of cda based on documentRoot
-                    const cdaDefault = (documentRoot === `https://wm.${office}.ds.usace.army.mil/`) ? "internal" : "public";
-                    console.log("cdaDefault: ", cdaDefault);
+                    var office = urlParams.get('office') || "MVS";
+                    console.log('office: ', office);
 
-                    var selectedBasin = urlParams.get('basin') || null;
+                    var selectedBasin = urlParams.get('basin') || "Mississippi";
                     console.log('selectedBasin: ', selectedBasin);
 
-                    var basin = urlParams.get('basin') || null;
+                    var basin = urlParams.get('basin') || "Mississippi";
                     console.log('basin: ', basin);
 
                     var type = urlParams.get('type') || null;
                     console.log('type: ', type);
 
+                    // Determine the default value of cda based on documentRoot
+                    if (documentRoot === `https://wm.${office.toLocaleLowerCase()}.ds.usace.army.mil/`) {
+                        cdaDefault = "internal";
+                    } else if (documentRoot === `https://wm-${office.toLocaleLowerCase()}coop.mvk.ds.usace.army.mil/`) {
+                        cdaDefault = "internal-coop";
+                    } else {
+                        cdaDefault = "public";
+                    }
+                    console.log("cdaDefault: ", cdaDefault);
+
                     var cda = urlParams.get('cda') || cdaDefault;
                     console.log('cda: ', cda);
-
-                    var office = urlParams.get('office') || "MVS";
-                    console.log('office: ', office);
 
                     let mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
                         || window.innerWidth <= 768;

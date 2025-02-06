@@ -59,6 +59,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (cda === "internal") {
         setBaseUrl = `https://wm.${office.toLowerCase()}.ds.usace.army.mil:8243/${office.toLowerCase()}-data/`;
         // console.log("setBaseUrl: ", setBaseUrl);
+    } else if (cda === "internal-coop") {
+        setBaseUrl = `https://wm-${office.toLowerCase()}coop.mvk.ds.usace.army.mil:8243/${office.toLowerCase()}-data/`;
+        // console.log("setBaseUrl: ", setBaseUrl);
     } else if (cda === "public") {
         setBaseUrl = `https://cwms-data.usace.army.mil/cwms-data/`;
         // console.log("setBaseUrl: ", setBaseUrl);
