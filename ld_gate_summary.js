@@ -1235,7 +1235,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const locationRow = document.createElement('tr');
                 const locationCell = document.createElement('th');
                 locationCell.colSpan = 6; // Set colspan to 6 for location ID
-                locationCell.textContent = location['location-id'];
+                locationCell.textContent = (location['location-id']).split('-')[0];
                 // locationCell.style.height = '50px'; // Set the height of the locationCell
                 locationRow.appendChild(locationCell);
                 table.appendChild(locationRow); // Append the location row to the table

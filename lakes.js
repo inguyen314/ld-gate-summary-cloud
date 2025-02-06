@@ -614,7 +614,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const locationCell = document.createElement('th');
                 locationCell.colSpan = 5; // Set colspan to 6 for location ID
                 locationCell.style.backgroundColor = 'darkslategrey'; // Set background color
-                locationCell.textContent = location['location-id'];
+                locationCell.textContent = (location['location-id']).split('-')[0];
                 locationRow.appendChild(locationCell);
                 table.appendChild(locationRow); // Append the location row to the table
 
@@ -628,10 +628,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                 // Inline extraction of "Breese" from controlPointTsid
                 if (controlPointEntry) {
-                    columns[2] = `Outflow 1 (cfs) - ${controlPointEntry.tsid.split('-')[0]}`; // Extract "Breese" directly
+                    columns[2] = `${controlPointEntry.tsid.split('-')[0]} Flow (cfs)`; // Extract "Breese" directly
                 }
                 if (controlPointEntry2) {
-                    columns[3] = `Outflow 2 (cfs) - ${controlPointEntry2.tsid.split('-')[0]}`; // Extract "Breese" directly
+                    columns[3] = `${controlPointEntry2.tsid.split('-')[0]} Flow (cfs)`; // Extract "Breese" directly
                 }
 
                 // Append column headers

@@ -579,7 +579,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const locationCell = document.createElement('th');
                 locationCell.colSpan = 3; // Set colspan to 6 for location ID
                 locationCell.style.backgroundColor = 'darkgreen'; // Set background color
-                locationCell.textContent = location['location-id'];
+                locationCell.textContent = (location['location-id']).split('-')[0];
                 locationRow.appendChild(locationCell);
                 table.appendChild(locationRow); // Append the location row to the table
 
