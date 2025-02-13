@@ -1,22 +1,4 @@
 document.addEventListener('DOMContentLoaded', async function () {
-    // Check if the type is "blackberry"
-    // if (type === "blackberry") {
-    //     // Display the blackberry loading and table container
-    //     const blackberryContainer = `
-    //         <div id="loading_blackberry" style="display: none;">
-    //             <img src="images/loading4.gif" style="height: 50px; width: 50px;" alt="Loading..." />
-    //         </div>
-    //         <div id="table_container_blackberry"></div>
-    //         <script src="blackberry.js"></script>
-    //     `;
-
-    //     // Append the blackberry content to the appropriate location in the DOM
-    //     const pageContent = document.querySelector('.page-content');
-    //     if (pageContent) {
-    //         pageContent.insertAdjacentHTML('beforeend', blackberryContainer);
-    //     }
-    // }
-
     const currentDateTime = new Date();
     console.log("currentDateTime: ", currentDateTime);
 
