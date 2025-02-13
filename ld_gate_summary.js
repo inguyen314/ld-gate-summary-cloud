@@ -65,6 +65,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
     // console.log("setBaseUrl: ", setBaseUrl);
 
+    let setJsonFileBaseUrl = null;
+    if (cda === "internal") {
+        setJsonFileBaseUrl = `https://wm.mvs.ds.usace.army.mil/`;
+    } else if (cda === "internal-coop") {
+        setJsonFileBaseUrl = `https://wm-mvscoop.mvk.ds.usace.army.mil/`;
+    } else if (cda === "public") {
+        setJsonFileBaseUrl = `https://www.mvs-wc.usace.army.mil/`;
+    }
+    console.log("setJsonFileBaseUrl: ", setJsonFileBaseUrl);
+
     // Define the URL to fetch location groups based on category
     const categoryApiUrl = setBaseUrl + `location/group?office=${office}&include-assigned=false&location-category-like=${setLocationCategory}`;
     // console.log("categoryApiUrl: ", categoryApiUrl);
@@ -853,6 +863,19 @@ document.addEventListener('DOMContentLoaded', async function () {
         .catch(error => {
             console.error('There was a problem with the initial fetch operation:', error);
             loadingIndicator.style.display = 'none';
+            document.getElementById(`table_container_${setReportDiv}`).innerText = "Cloud database is down";
+
+            // Show the "Report Issue" button
+            document.getElementById('reportIssueBtn').style.display = "block";
+
+            // Ensure sendEmail is globally accessible
+            window.sendEmail = function () {
+                const subject = encodeURIComponent("Cloud Database Down");
+                const body = encodeURIComponent("Hello,\n\nIt appears that the cloud database is down. Please investigate the issue.\n\nError details: Network response was not ok." + categoryApiUrl);
+                const email = "DLL-CEMVS-WM-SysAdmins@usace.army.mil"; // Replace with actual support email
+
+                window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+            };
         });
 
     function filterByLocationCategory(array, setLocationCategory) {
