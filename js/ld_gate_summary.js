@@ -853,7 +853,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             // Ensure sendEmail is globally accessible
             window.sendEmail = function () {
                 const subject = encodeURIComponent("Cloud Database Down");
-                const body = encodeURIComponent("Hello,\n\nIt appears that the cloud database is down. Please investigate the issue.\n\nError details: Network response was not ok." + categoryApiUrl);
+                const body = encodeURIComponent("Hello,\n\nIt appears that the cloud database is down. Please investigate the issue." + setBaseUrl);
                 const email = "DLL-CEMVS-WM-SysAdmins@usace.army.mil"; // Replace with actual support email
 
                 window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
