@@ -90,7 +90,7 @@
 
                     // Function to print the table if the device is mobile
                     function printTableIfMobile() {
-                        if (isMobile()) {
+                        if (cda === "internal") {
                             document.getElementById("gage_data1").style.display = "table";
                             document.getElementById("gage_data2").style.display = "table";
                             document.getElementById("gage_data3").style.display = "table";
@@ -103,18 +103,18 @@
 
                 <button id="reportIssueBtn" style="display: none;" onclick="sendEmail()">Report Issue</button>
 
-                <div id="loading_ld_gate_summary" style="display: none;"><img src="mvs/images/loading4.gif"
+                <div id="loading_ld_gate_summary" style="display: none;"><img src="images/loading4.gif"
                         style='height: 50px; width: 50px;' alt="Loading..." /></div>
                 <div id="table_container_ld_gate_summary"></div>
                 <script src="js/ld_gate_summary.js"></script>
 
                 <!-- if type === blackberry -->
-                <div id="loading_blackberry" style="display: none;"><img src="mvs/images/loading4.gif"
+                <div id="loading_blackberry" style="display: none;"><img src="images/loading4.gif"
                         style='height: 50px; width: 50px;' alt="Loading..." /></div>
                 <div id="table_container_blackberry"></div>
                 <script src="js/blackberry.js"></script>
 
-                <div id="loading_lakes" style="display: none;"><img src="mvs/images/loading4.gif"
+                <div id="loading_lakes" style="display: none;"><img src="images/loading4.gif"
                         style='height: 50px; width: 50px;' alt="Loading..." /></div>
                 <div id="table_container_lakes"></div>
                 <script src="js/lakes.js"></script>
