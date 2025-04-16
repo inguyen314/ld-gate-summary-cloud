@@ -847,7 +847,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         .catch(error => {
             console.error('There was a problem with the initial fetch operation:', error);
             loadingIndicator.style.display = 'none';
-            document.getElementById(`table_container_${setReportDiv}`).innerText = "Cloud database is down";
+            document.getElementById(`table_container_${setReportDiv}`).innerHTML =
+                `Cloud database is down. Submit outage at <a href='https://github.com/USACE/cwms-data-api/issues' target='_blank'>https://github.com/USACE/cwms-data-api/issues</a>.`;
 
             // Show the "Report Issue" button
             document.getElementById('reportIssueBtn').style.display = "block";
@@ -855,7 +856,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             // Ensure sendEmail is globally accessible
             window.sendEmail = function () {
                 const subject = encodeURIComponent("Cloud Database Down");
-                const body = encodeURIComponent("Hello,\n\nIt appears that the cloud database is down. Please investigate the issue." + setBaseUrl);
+                const body = encodeURIComponent("Hello,\n\nIt appears that the cloud database is down. Please investigate the issue.");
                 const email = "DLL-CEMVS-WM-SysAdmins@usace.army.mil"; // Replace with actual support email
 
                 window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;

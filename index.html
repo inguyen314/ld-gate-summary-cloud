@@ -235,7 +235,7 @@
 
 </html>
 
-<script>
+<!-- <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Create a URL object with the current page URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -249,6 +249,26 @@
             const titleSpan = document.querySelector('.titleLabel.title');
             if (titleSpan) {
                 titleSpan.textContent = title;
+            }
+        }
+    });
+</script> -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Create a URL object with the current page URL
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Update the LD Gate Summary
+        let title;
+        title = `${office} Realtime LD Gate Summary`;
+
+
+        if (title) {
+            document.title = title;
+            const titleSpan = document.querySelector('.titleLabel.title');
+            if (titleSpan) {
+                titleSpan.textContent = `LD Gate Summary`;
             }
         }
     });
